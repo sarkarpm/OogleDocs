@@ -86,7 +86,6 @@ const RegisterScreen = () => {
         <input type="submit" onClick={() => { 
                 //create MongoUser, reRoute to Login page
             }} value="Register"/>
-
         </div>
         </div>
     );
