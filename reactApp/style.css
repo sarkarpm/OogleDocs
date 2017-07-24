@@ -1,0 +1,13 @@
+.editorPage {
+    display: flex;
+    flex-direction: column;
+    background-color: lightgrey;
+}
+
+.editorTitle {
+    text-align: center;
+}
+
+.toolbar {
+    background-color: lightcoral;
+}
