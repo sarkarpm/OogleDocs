@@ -35,15 +35,15 @@
     "webpack-dev-server": "^2.6.0"
   },
   "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
     "css-loader": "^0.28.4",
+    "draft-js": "^0.10.1",
     "express": "^4.15.3",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-router-dom": "^4.1.2",
-    "style-loader": "^0.18.2",
-    "draft-js": "^0.10.1",
-    "bootstrap": "^4.0.0-alpha.6",
     "react-transition-group": "^1.2.0",
-    "reactstrap": "^4.8.0"
+    "reactstrap": "^4.8.0",
+    "style-loader": "^0.18.2"
   }
 }

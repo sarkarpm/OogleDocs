@@ -5,23 +5,22 @@ import {
 import { Editor, EditorState, RichUtils, Modifier } from 'draft-js';
 import customStyleMap from '../customStyleMap/customStyleMap';
 import colorStyleMap from '../customStyleMap/colorStyleMap';
-import { ButtonDropdown, DropdownToggle, DropdownMenu, Button, ButtonGroup, DropdownItem } from 'reactstrap';
-import StyleButton from '../colors/StyleButton';
-import COLORS from '../colors/colors';
+import Toolbar from './Toolbar';
 
 class DocEdit extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            editorState: EditorState.createEmpty(),
-            dropdownOpen: false
+            editorState: EditorState.createEmpty()
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
         this.handleKeyCommand = this.handleKeyCommand.bind( this );
 
         this.focus = () => this.refs.editor.focus();
         this.toggleColor = ( toggledColor ) => this._toggleColor( toggledColor );
-        this.toggle = this.toggle.bind( this );
+        this._onBoldClick = this._onBoldClick.bind( this );
+        this._onItalicClick = this._onItalicClick.bind( this );
+        this._onUnderlineClick = this._onUnderlineClick.bind( this );
     }
 
     _onBoldClick() {
@@ -46,11 +45,9 @@ class DocEdit extends React.Component {
 
     _toggleColor( toggledColor ) {
 
-        // this.onChange(RichUtils.toggleInlineStyle(this.state.editorState, {color: 'rgba(255, 0, 0, 1.0)'}));
         const { editorState } = this.state;
         const selection = editorState.getSelection();
 
-        // Let's just allow one color at a time. Turn off all active colors.
         const nextContentState = Object.keys( colorStyleMap )
             .reduce(( contentState, color ) => {
                 return Modifier.removeInlineStyle( contentState, selection, color );
@@ -82,11 +79,6 @@ class DocEdit extends React.Component {
         this.onChange( nextEditorState );
     }
 
-    toggle() {
-        this.setState( {
-            dropdownOpen: !this.state.dropdownOpen
-        } );
-    }
 
     render() {
         return (
@@ -98,30 +90,12 @@ class DocEdit extends React.Component {
                     <h1>{ this.props.match.params.docid }</h1>
                     <p>ID: { this.props.match.params.docid }</p>
                 </div>
-                <div className="toolbar">
-                    <ButtonGroup>
-                        <Button onClick={ this._onBoldClick.bind( this ) }>Bold</Button>
-                        <Button onClick={ this._onItalicClick.bind( this ) }>Italic</Button>
-                        <Button onClick={ this._onUnderlineClick.bind( this ) }>Underline</Button>
-                        <ButtonDropdown isOpen={ this.state.dropdownOpen } toggle={ this.toggle }>
-                            <DropdownToggle caret>
-                                Colors
-								</DropdownToggle>
-                            <DropdownMenu>
-                                { COLORS.map(( type, index ) =>
-                                    <DropdownItem key={ index }>
-                                        <StyleButton
-                                            label={ type.label }
-                                            onToggle={ this.toggleColor }
-                                            style={ type.style }
-                                            key={ index }
-                                        />
-                                    </DropdownItem>
-                                ) }
-                            </DropdownMenu>
-                        </ButtonDropdown>
-                    </ButtonGroup>
-                </div>
+                <Toolbar
+									onBoldClick={this._onBoldClick}
+									onItalicClick={this._onItalicClick}
+									onUnderlineClick={this._onUnderlineClick}
+									toggleColor={this.toggleColor}
+								/>
                 <div className='editor' onClick={ this.focus }>
                     <Editor
                         customStyleMap={ customStyleMap }
