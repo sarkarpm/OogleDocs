@@ -10,8 +10,7 @@ class DocEdit extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            editorState: EditorState.createEmpty(),
-            background: '#fff'
+            editorState: EditorState.createEmpty()
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
 
