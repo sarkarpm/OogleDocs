@@ -8,7 +8,7 @@ class LeftBlock extends React.Component {
     }
     render() {
         return (
-					<div style={{textAlign: 'left'}}>
+					<div className="leftBlock">
 						{this.props.children}
 					</div>
         );
@@ -21,7 +21,7 @@ class CenterBlock extends React.Component {
     }
     render() {
         return (
-					<div style={{textAlign: 'center'}}>
+					<div className="centerBlock">
 						{this.props.children}
 					</div>
         );
@@ -34,7 +34,7 @@ class RightBlock extends React.Component {
     }
     render() {
         return (
-				<div style={{textAlign: 'right'}}>
+				<div className="rightBlock">
 					{this.props.children}
 				</div>
         );

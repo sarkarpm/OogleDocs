@@ -22,7 +22,6 @@ class Toolbar extends React.Component {
         return (
 					<div className="toolbar">
 							<ButtonGroup>
-									<Button onClick={ this.props.onBoldClick }>Bold</Button>
 									<Button onClick={ this.props.onItalicClick }>Italic</Button>
 									<Button onClick={ this.props.onUnderlineClick }>Underline</Button>
 									<ButtonDropdown isOpen={ this.state.colorDropdownOpen } toggle={ this.toggleColorDropdown }>
