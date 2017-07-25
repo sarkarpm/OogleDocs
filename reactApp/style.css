@@ -12,3 +12,19 @@ h1 {
 	display: flex;
 	justify-content: center;
 }
+
+.centerBlock {
+  text-align: center;
+}
+
+.leftBlock {
+	text-align: left;
+}
+
+.rightBlock {
+	text-align: right;
+}
+
+.superFancyBlockquote {
+	color: black;
+}
