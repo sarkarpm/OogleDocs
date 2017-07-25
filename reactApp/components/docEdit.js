@@ -13,11 +13,8 @@ class DocEdit extends React.Component {
             editorState: EditorState.createEmpty()
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
-
         this.focus = () => this.refs.editor.focus();
-
-        _.bindAll(this, 'handleKeyCommand', '_onBoldClick', '_onItalicClick',
-        '_onUnderlineClick', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange');
+        _.bindAll(this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange');
     }
 
     handleKeyCommand( command ) {
@@ -29,15 +26,8 @@ class DocEdit extends React.Component {
         return 'not-handled';
     }
 
-    _onBoldClick() {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'BOLD' ) );
-    }
-    _onItalicClick() {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'ITALIC' ) );
-    }
-
-    _onUnderlineClick() {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'UNDERLINE' ) );
+    _toggleTypeface(type) {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, type ) );
     }
 
     _toggleColor( toggledColor ) {
@@ -63,12 +53,10 @@ class DocEdit extends React.Component {
                     <p>ID: { this.props.match.params.docid }</p>
                 </div>
                 <Toolbar
-									onBoldClick={this._onBoldClick}
-									onItalicClick={this._onItalicClick}
-									onUnderlineClick={this._onUnderlineClick}
+									onToggleTypeface={this._toggleTypeface}
 									onToggleColor={this._toggleColor}
-                  toggleFontSize={this._toggleFontSize}
-									toggleBlockType={this._toggleBlockType}
+                  onToggleFontSize={this._toggleFontSize}
+									onToggleBlockType={this._toggleBlockType}
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
