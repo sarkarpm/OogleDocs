@@ -13,7 +13,12 @@ function _onUnderlineClick() {
 }
 
 function _toggleColor( toggledColor ) {
+    console.log('color in function', toggledColor);
     this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledColor ) );
+}
+
+function _toggleFontSize( toggledFontSize ) {
+    this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledFontSize ) );
 }
 
 function _toggleBlockType(blockType) {
@@ -25,5 +30,6 @@ module.exports = {
     _onItalicClick,
     _onUnderlineClick,
     _toggleColor,
+    _toggleFontSize,
     _toggleBlockType
 };

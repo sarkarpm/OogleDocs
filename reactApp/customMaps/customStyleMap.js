@@ -1,23 +1,89 @@
 export default {
-    red: {
-        color: 'rgba(255, 0, 0, 1.0)',
+    "#f44336": {
+        color: "#f44336"
     },
-    orange: {
-        color: 'rgba(255, 127, 0, 1.0)',
+    "#e91e63": {
+        color: "#e91e63"
     },
-    yellow: {
-        color: 'rgba(180, 180, 0, 1.0)',
+    "#9c27b0": {
+        color: "#9c27b0"
     },
-    green: {
-        color: 'rgba(0, 180, 0, 1.0)',
+    "#673ab7": {
+        color: "#673ab7"
     },
-    blue: {
-        color: 'rgba(0, 0, 255, 1.0)',
+    "#3f51b5": {
+        color: "#3f51b5"
     },
-    indigo: {
-        color: 'rgba(75, 0, 130, 1.0)',
+    "#2196f3": {
+        color: "#2196f3"
     },
-    violet: {
-        color: 'rgba(127, 0, 255, 1.0)',
+    "#03a9f4": {
+        color: "#03a9f4"
+    },
+    "#00bcd4": {
+        color: "#00bcd4"
+    },
+    "#009688": {
+        color: "#009688"
+    },
+    "#4caf50": {
+        color: "#4caf50"
+    },
+    "#8bc34a": {
+        color: "#8bc34a"
+    },
+    "#cddc39": {
+        color: "#cddc39"
+    },
+    "#ffeb3b": {
+        color: "#ffeb3b"
+    },
+    "#ffc107": {
+        color: "#ffc107"
+    },
+    "#ff9800": {
+        color: "#ff9800"
+    },
+    "#ff5722": {
+        color: "#ff5722"
+    },
+    "#795548": {
+        color: "#795548"
+    },
+    "#607d8b" : {
+        color: "#607d8b"
+    },
+    fontSize9: {
+        fontSize: 9
+    },
+    fontSize10: {
+        fontSize: 10
+    },
+    fontSize11: {
+        fontSize: 11
+    },
+    fontSize12: {
+        fontSize: 12
+    },
+    fontSize13: {
+        fontSize: 13
+    },
+    fontSize14: {
+        fontSize: 14
+    },
+    fontSize18: {
+        fontSize: 18
+    },
+    fontSize24: {
+        fontSize: 24
+    },
+    fontSize36: {
+        fontSize: 36
+    },
+    fontSize48: {
+        fontSize: 48
+    },
+    fontSize64: {
+        fontSize: 64
     },
 };

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Editor, EditorState} from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
-import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor, _toggleBlockType } from '../functions/toolbarClicks';
+import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor, _toggleFontSize, _toggleBlockType } from '../functions/toolbarClicks';
 import { handleKeyCommand } from '../functions/handleKeyCommand';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
 
@@ -12,23 +12,28 @@ class DocEdit extends React.Component {
         super( props );
         this.state = {
             editorState: EditorState.createEmpty(),
+            customStyleMap,
             _toggleColor,
+            _toggleFontSize,
             _onBoldClick,
             _onItalicClick,
             _onUnderlineClick,
             _toggleBlockType,
-            handleKeyCommand
+            handleKeyCommand,
+            background: '#fff'
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
         this.state.handleKeyCommand = this.state.handleKeyCommand.bind( this );
 
         this.focus = () => this.refs.editor.focus();
         this.state._toggleColor = this.state._toggleColor.bind( this );
+        this.state._toggleFontSize = this.state._toggleFontSize.bind( this );
         this.state._toggleBlockType = this.state._toggleBlockType.bind( this );
         this.state._onBoldClick = this.state._onBoldClick.bind( this );
         this.state._onItalicClick = this.state._onItalicClick.bind( this );
         this.state._onUnderlineClick = this.state._onUnderlineClick.bind( this );
     }
+
 
     render() {
         return (
@@ -44,7 +49,8 @@ class DocEdit extends React.Component {
 									onBoldClick={this.state._onBoldClick}
 									onItalicClick={this.state._onItalicClick}
 									onUnderlineClick={this.state._onUnderlineClick}
-									toggleColor={this.state._toggleColor}
+									onToggleColor={this.state._toggleColor}
+                  toggleFontSize={this.state._toggleFontSize}
 									toggleBlockType={this.state._toggleBlockType}
 								/>
                 <div className='editor' onClick={ this.focus }>
