@@ -48,8 +48,8 @@ const Register = () => {
             <div>
                 <button onClick={ () => {
                     // TODO: Create a mongo user and send it to the database
-                } } value="Register" />
-                <Link to="/login"> TEMP LINK </Link>
+                } }>Register</button>
+                <Link to="/login">Login</Link>
             </div>
         </div>
     );

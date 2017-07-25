@@ -36,7 +36,6 @@ class DocEdit extends React.Component {
                 </div>
                 <div className="toolbar">
                     <button onClick={ this._onBoldClick.bind( this ) }>Bold</button>
-                    <button onClick={ this._onLeftClick.bind( this ) }>Left</button>
                 </div>
                 <div className="editorBox">
                     <Editor

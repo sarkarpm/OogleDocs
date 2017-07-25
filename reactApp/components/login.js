@@ -28,7 +28,7 @@ const Login = () => {
             <div>
                 <button onClick={ () => {
                     // TODO: Create post request to the database
-                } } value="Login" />
+                } }>Login</button>
                 <Link to="/register">Register</Link>
                 <Link to="/home">TEMP LINK</Link>
             </div>
