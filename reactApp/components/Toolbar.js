@@ -1,7 +1,7 @@
 import React from 'react';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, Button, ButtonGroup, DropdownItem } from 'reactstrap';
-import COLORS from '../colors/colors';
-import BLOCKS from '../colors/blockTypes';
+import COLORS from '../labels/colorLabels';
+import BLOCKS from '../labels/blockLabels';
 
 class Toolbar extends React.Component {
     constructor(props) {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Editor, EditorState} from 'draft-js';
-import customStyleMap from '../customStyleMap/customStyleMap';
+import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor, _toggleBlockType } from '../functions/toolbarClicks';
 import { handleKeyCommand } from '../functions/handleKeyCommand';
-import extendedBlockRenderMap from './customBlocks';
+import extendedBlockRenderMap from '../customMaps/customBlockMap';
 
 class DocEdit extends React.Component {
     constructor( props ) {
