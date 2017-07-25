@@ -1,10 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Editor, EditorState} from 'draft-js';
+import { Editor, EditorState, RichUtils} from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
-import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor, _toggleFontSize, _toggleBlockType } from '../functions/toolbarClicks';
-import { handleKeyCommand } from '../functions/handleKeyCommand';
+import _ from 'underscore';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
 
 class DocEdit extends React.Component {
@@ -12,28 +11,47 @@ class DocEdit extends React.Component {
         super( props );
         this.state = {
             editorState: EditorState.createEmpty(),
-            customStyleMap,
-            _toggleColor,
-            _toggleFontSize,
-            _onBoldClick,
-            _onItalicClick,
-            _onUnderlineClick,
-            _toggleBlockType,
-            handleKeyCommand,
             background: '#fff'
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
-        this.state.handleKeyCommand = this.state.handleKeyCommand.bind( this );
 
         this.focus = () => this.refs.editor.focus();
-        this.state._toggleColor = this.state._toggleColor.bind( this );
-        this.state._toggleFontSize = this.state._toggleFontSize.bind( this );
-        this.state._toggleBlockType = this.state._toggleBlockType.bind( this );
-        this.state._onBoldClick = this.state._onBoldClick.bind( this );
-        this.state._onItalicClick = this.state._onItalicClick.bind( this );
-        this.state._onUnderlineClick = this.state._onUnderlineClick.bind( this );
+
+        _.bindAll(this, 'handleKeyCommand', '_onBoldClick', '_onItalicClick',
+        '_onUnderlineClick', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange');
     }
 
+    handleKeyCommand( command ) {
+        const newState = RichUtils.handleKeyCommand( this.state.editorState, command );
+        if ( newState ) {
+            this.onChange( newState );
+            return 'handled';
+        }
+        return 'not-handled';
+    }
+
+    _onBoldClick() {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'BOLD' ) );
+    }
+    _onItalicClick() {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'ITALIC' ) );
+    }
+
+    _onUnderlineClick() {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, 'UNDERLINE' ) );
+    }
+
+    _toggleColor( toggledColor ) {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledColor ) );
+    }
+
+    _toggleFontSize( toggledFontSize ) {
+        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledFontSize ) );
+    }
+
+    _toggleBlockType(blockType) {
+        this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
+    }
 
     render() {
         return (
@@ -46,12 +64,12 @@ class DocEdit extends React.Component {
                     <p>ID: { this.props.match.params.docid }</p>
                 </div>
                 <Toolbar
-									onBoldClick={this.state._onBoldClick}
-									onItalicClick={this.state._onItalicClick}
-									onUnderlineClick={this.state._onUnderlineClick}
-									onToggleColor={this.state._toggleColor}
-                  toggleFontSize={this.state._toggleFontSize}
-									toggleBlockType={this.state._toggleBlockType}
+									onBoldClick={this._onBoldClick}
+									onItalicClick={this._onItalicClick}
+									onUnderlineClick={this._onUnderlineClick}
+									onToggleColor={this._toggleColor}
+                  toggleFontSize={this._toggleFontSize}
+									toggleBlockType={this._toggleBlockType}
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
