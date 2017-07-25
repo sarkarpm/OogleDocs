@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 import { MyEditor } from './MyEditor';
+import 'bootstrap/dist/css/bootstrap.css';
 /* This can check if your electron app can communicate with your backend */
 // fetch('http://localhost:3000')
 // .then(resp => resp.text())
