@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Editor, EditorState, RichUtils} from 'draft-js';
+import { Editor, EditorState, RichUtils } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import _ from 'underscore';
@@ -14,7 +14,7 @@ class DocEdit extends React.Component {
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
         this.focus = () => this.refs.editor.focus();
-        _.bindAll(this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange');
+        _.bindAll( this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange' );
     }
 
     handleKeyCommand( command ) {
@@ -26,7 +26,7 @@ class DocEdit extends React.Component {
         return 'not-handled';
     }
 
-    _toggleTypeface(type) {
+    _toggleTypeface( type ) {
         this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, type ) );
     }
 
@@ -38,7 +38,7 @@ class DocEdit extends React.Component {
         this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledFontSize ) );
     }
 
-    _toggleBlockType(blockType) {
+    _toggleBlockType( blockType) {
         this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
     }
 
@@ -53,10 +53,10 @@ class DocEdit extends React.Component {
                     <p>ID: { this.props.match.params.docid }</p>
                 </div>
                 <Toolbar
-									onToggleTypeface={this._toggleTypeface}
-									onToggleColor={this._toggleColor}
-                  onToggleFontSize={this._toggleFontSize}
-									onToggleBlockType={this._toggleBlockType}
+									onToggleTypeface={ this._toggleTypeface }
+									onToggleColor={ this._toggleColor }
+                  onToggleFontSize={ this._toggleFontSize }
+									onToggleBlockType={ this._toggleBlockType }
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
@@ -66,7 +66,7 @@ class DocEdit extends React.Component {
                       handleKeyCommand={ this.handleKeyCommand }
                       placeholder="Write something colorful..."
                       ref="editor"
-											blockRenderMap={extendedBlockRenderMap}
+											blockRenderMap={ extendedBlockRenderMap }
                   />
                 </div>
             </div>

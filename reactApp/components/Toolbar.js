@@ -4,7 +4,7 @@ import BLOCKS from '../labels/blockLabels';
 import FONT_SIZES from '../labels/fontLabels';
 var FontAwesome = require('react-fontawesome');
 import { CirclePicker } from 'react-color';
-
+import _ from 'underscore';
 
 class Toolbar extends React.Component {
     constructor(props) {
@@ -13,11 +13,7 @@ class Toolbar extends React.Component {
             displayCirclePicker: false,
             fontSizeDropdownOpen: false
         };
-        this.handleColorClick = this.handleColorClick.bind(this);
-        this.handleColorClose = this.handleColorClose.bind(this);
-        this.toggleFontSizeDropdown = this.toggleFontSizeDropdown.bind(this);
-
-        this.handleChangeComplete = this.handleChangeComplete.bind(this);
+        _.bindAll( this, 'handleColorClick', 'handleColorClose', 'toggleFontSizeDropdown', 'handleChangeComplete' );
     }
 
     handleColorClick(){
@@ -28,7 +24,6 @@ class Toolbar extends React.Component {
     handleColorClose(){
         this.setState({ displayCirclePicker: false });
     }
-
 
     handleChangeComplete(color){
         console.log('here in handled change', color.hex);
@@ -55,13 +50,13 @@ class Toolbar extends React.Component {
 									<Button onClick={ () => this.props.onToggleTypeface('BOLD') }><FontAwesome name='bold' /></Button>
 									<Button onClick={ () => this.props.onToggleTypeface('ITALIC')  }><FontAwesome name='italic' /></Button>
 									<Button onClick={ () => this.props.onToggleTypeface('UNDERLINE')  }><FontAwesome name='underline' /></Button>
-                  <Button onClick={this.handleColorClick }><FontAwesome name='paint-brush' /></Button>
+                  <Button onClick={ this.handleColorClick }><FontAwesome name='paint-brush' /></Button>
                     { this.state.displayCirclePicker ? <div style={ popover }>
-                      <CirclePicker onChangeComplete={this.handleChangeComplete}/>
+                      <CirclePicker onChangeComplete={ this.handleChangeComplete }/>
                     </div> : null }
-									{BLOCKS.map((type, index) => (
-										<Button key={index} onClick={() => this.props.onToggleBlockType(type.style) }>
-											<FontAwesome name={type.label} />
+									{BLOCKS.map( ( type, index ) => (
+										<Button key={ index } onClick={() => this.props.onToggleBlockType( type.style ) }>
+											<FontAwesome name={ type.label } />
 										</Button>
 									))}
                   <ButtonDropdown isOpen={ this.state.fontSizeDropdownOpen } toggle={ this.toggleFontSizeDropdown }>
@@ -69,8 +64,8 @@ class Toolbar extends React.Component {
 													<FontAwesome name='text-height' />
 											</DropdownToggle>
 											<DropdownMenu>
-													{ FONT_SIZES.map(( type, index ) =>
-															<DropdownItem key={ index } onClick={ () => this.props.onToggleFontSize(type.style) } >
+													{ FONT_SIZES.map( ( type, index ) =>
+															<DropdownItem key={ index } onClick={ () => this.props.onToggleFontSize( type.style ) } >
 																<p>{ type.label }</p>
 															</DropdownItem>
 													) }
