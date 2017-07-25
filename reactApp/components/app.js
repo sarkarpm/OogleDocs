@@ -20,7 +20,7 @@ class App extends React.Component {
                     <Route path='/home' component={ Home } />
                     <Route path='/login' component={ Login } />
                     <Route path='/register' component={ Register } />
-                    <Route path='/' render={ () => <Redirect to='/login' /> } />
+                    <Route path='/' render={ () => <Redirect to='#/login' /> } />
                 </Switch>
             </Router>
         );

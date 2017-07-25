@@ -1,55 +1,33 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Button, Input } from 'reactstrap';
 
 const Register = () => {
-    let input;
-    let username;
-    let password;
-    let firstName;
-    let lastName;
     return (
-        <div className="container">
+        <div>
             <h1>Register</h1>
             <div>
-                <input
+                <Input
                     type="text"
                     placeholder="First Name"
-                    value={ firstName }
-                    ref={ node => { input = node; } }
-                    onChange={ () => firstName = input.value }
                 />
-            </div>
-            <div>
-                <input
+                <Input
                     type="text"
                     placeholder="Last Name"
-                    value={ lastName }
-                    ref={ node => { input = node; } }
-                    onChange={ () => lastName = input.value }
                 />
-            </div>
-            <div>
-                <input
+                <Input
                     type="text"
                     placeholder="Username"
-                    value={ username }
-                    ref={ node => { input = node; } }
-                    onChange={ () => username = input.value }
                 />
-            </div>
-            <div>
-                <input type="password"
+                <Input
+                    type="password"
                     placeholder="Password"
-                    value={ password }
-                    ref={ node => { input = node; } }
-                    onChange={ () => password = input.value }
                 />
+                <Button onClick={ () => {
+                    // TODO: Create a mongo user and send it to the database
+                } }>Register</Button>
             </div>
             <div>
-                <button onClick={ () => {
-                    // TODO: Create a mongo user and send it to the database
-                } }>Register</button>
-                <Link to="/login">Login</Link>
+                <Button href="#/login">Login</Button>
             </div>
         </div>
     );
