@@ -1,6 +1,7 @@
 import React from 'react';
 import { ButtonDropdown, DropdownToggle, DropdownMenu, Button, ButtonGroup, DropdownItem } from 'reactstrap';
 import COLORS from '../colors/colors';
+import BLOCKS from '../colors/blockTypes';
 
 class Toolbar extends React.Component {
     constructor(props) {
@@ -36,6 +37,11 @@ class Toolbar extends React.Component {
 													) }
 											</DropdownMenu>
 									</ButtonDropdown>
+									{BLOCKS.map((type, index) => (
+										<Button key={index} onClick={() => this.props.toggleBlockType(type.style) }>
+											{type.label}
+										</Button>
+									))}
 							</ButtonGroup>
 					</div>
         );

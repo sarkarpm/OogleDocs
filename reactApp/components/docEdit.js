@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom';
 import { Editor, EditorState} from 'draft-js';
 import customStyleMap from '../customStyleMap/customStyleMap';
 import Toolbar from './Toolbar';
-import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor } from '../functions/toolbarClicks';
+import { _onBoldClick,_onItalicClick, _onUnderlineClick, _toggleColor, _toggleBlockType } from '../functions/toolbarClicks';
 import { handleKeyCommand } from '../functions/handleKeyCommand';
+import extendedBlockRenderMap from './customBlocks';
 
 class DocEdit extends React.Component {
     constructor( props ) {
@@ -15,6 +16,7 @@ class DocEdit extends React.Component {
             _onBoldClick,
             _onItalicClick,
             _onUnderlineClick,
+            _toggleBlockType,
             handleKeyCommand
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
@@ -22,6 +24,7 @@ class DocEdit extends React.Component {
 
         this.focus = () => this.refs.editor.focus();
         this.state._toggleColor = this.state._toggleColor.bind( this );
+        this.state._toggleBlockType = this.state._toggleBlockType.bind( this );
         this.state._onBoldClick = this.state._onBoldClick.bind( this );
         this.state._onItalicClick = this.state._onItalicClick.bind( this );
         this.state._onUnderlineClick = this.state._onUnderlineClick.bind( this );
@@ -42,6 +45,7 @@ class DocEdit extends React.Component {
 									onItalicClick={this.state._onItalicClick}
 									onUnderlineClick={this.state._onUnderlineClick}
 									toggleColor={this.state._toggleColor}
+									toggleBlockType={this.state._toggleBlockType}
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
@@ -51,6 +55,7 @@ class DocEdit extends React.Component {
                       handleKeyCommand={ this.handleKeyCommand }
                       placeholder="Write something colorful..."
                       ref="editor"
+											blockRenderMap={extendedBlockRenderMap}
                   />
                 </div>
             </div>

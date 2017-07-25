@@ -16,9 +16,14 @@ function _toggleColor( toggledColor ) {
     this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledColor ) );
 }
 
+function _toggleBlockType(blockType) {
+    this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
+}
+
 module.exports = {
     _onBoldClick,
     _onItalicClick,
     _onUnderlineClick,
-    _toggleColor
+    _toggleColor,
+    _toggleBlockType
 };
