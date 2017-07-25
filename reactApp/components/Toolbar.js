@@ -11,7 +11,7 @@ class Toolbar extends React.Component {
         super(props);
         this.state = {
             displayCirclePicker: false,
-            fontSizeDropdownOpen: false
+            displayFontSizeDropdown: false
         };
         _.bindAll( this, 'handleColorClick', 'handleColorClose', 'toggleFontSizeDropdown', 'handleChangeComplete' );
     }
@@ -26,14 +26,13 @@ class Toolbar extends React.Component {
     }
 
     handleChangeComplete(color){
-        console.log('here in handled change', color.hex);
         this.props.onToggleColor(color.hex);
         this.handleColorClose();
     }
 
     toggleFontSizeDropdown() {
         this.setState( {
-            fontSizeDropdownOpen: !this.state.fontSizeDropdownOpen
+            displayFontSizeDropdown: !this.state.displayFontSizeDropdown
         } );
     }
 
@@ -59,7 +58,7 @@ class Toolbar extends React.Component {
 											<FontAwesome name={ type.label } />
 										</Button>
 									))}
-                  <ButtonDropdown isOpen={ this.state.fontSizeDropdownOpen } toggle={ this.toggleFontSizeDropdown }>
+                  <ButtonDropdown isOpen={ this.state.displayFontSizeDropdown } toggle={ this.toggleFontSizeDropdown }>
 											<DropdownToggle caret>
 													<FontAwesome name='text-height' />
 											</DropdownToggle>
