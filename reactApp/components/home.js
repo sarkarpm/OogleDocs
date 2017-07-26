@@ -1,13 +1,15 @@
 import React from 'react';
-import { Button, ButtonGroup, Input, Form, Modal, ModalHeader, ModalBody } from 'reactstrap';
+import { Button, ButtonGroup, Form, Modal, ModalHeader, ModalBody, Input } from 'reactstrap';
 // import { User, Document } from '../../models';
+import axios from 'axios';
 
 class Home extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
             createModal: false,
-            joinModal: false
+            joinModal: false,
+            buttonSet: []
         };
     }
 
@@ -23,27 +25,55 @@ class Home extends React.Component {
     }
     createDocument( event ) {
         event.preventDefault();
+        const self = this;
+        axios.post( 'http://localhost:3000/newdoc', {
+            password: document.getElementById( 'newPw' ).value,
+            title: document.getElementById( 'title' ).value,
+            userId: window.sessionStorage.getItem( 'userId' )
+        } ).then(( res ) => {
+            self.props.history.push( '/edit/' + res.data.resId );
+        } );
     }
     joinDocument( event ) {
         event.preventDefault();
     }
+    logout () {
+        axios.get( 'http://localhost:3000/logout');
+        window.sessionStorage.clear();
+        this.props.history.push('/login');
+    }
+
+    componentDidMount() {
+        const self = this;
+        axios.post( 'http://localhost:3000/doclist', { UId: window.sessionStorage.getItem( 'userId' ) } )
+            .then( res => {
+                console.log( 'THIS IS YOUR LIST', res.data.val );
+                const buttons = res.data.val.map( doc => <Button block key={doc._id} href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
+                self.setState({buttonSet: buttons});
+            } );
+    }
 
     render() {
-        // return User.findById( userId )
-        //     .then(( user ) => {
-        //         const docids = user.documents;
         const toggleCreate = this.toggleCreate.bind( this );
         const toggleJoin = this.toggleJoin.bind( this );
         return (
             <div>
-                <Button href='#/login'>Logout</Button>
+                <Button onClick={this.logout.bind(this)}>Logout</Button>
                 <h1>Documents Home</h1>
                 <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
                     <ModalHeader toggle={ toggleCreate }>Create Document</ModalHeader>
                     <ModalBody>
-                        <Form onSubmit={ this.createDocument }>
-                            <Input placeholder='Document Title' />
-                            <Input placeholder='Document Password' />
+                        <Form onSubmit={ this.createDocument.bind( this ) }>
+                            <Input
+                                type="text"
+                                id="title"
+                                placeholder="Title"
+                            />
+                            <Input
+                                type="text"
+                                id="newPw"
+                                placeholder="Password"
+                            />
                             <Button type="submit">Create Document</Button>
                         </Form>
                     </ModalBody>
@@ -52,20 +82,25 @@ class Home extends React.Component {
                     <ModalHeader toggle={ toggleJoin }>Join Document</ModalHeader>
                     <ModalBody>
                         <Form onSubmit={ this.joinDocument }>
-                            <Input placeholder='Document ID' />
-                            <Input placeholder='Document Password' />
+                            <Input
+                                type="text"
+                                id="docid"
+                                placeholder="Document ID"
+                            />
+                            <Input
+                                type="text"
+                                id="joinPw"
+                                placeholder="Password"
+                            />
                             <Button type="submit">Join Document</Button>
                         </Form>
                     </ModalBody>
                 </Modal>
                 <div className='homeDiv'>
                     <ButtonGroup vertical className='doclist'>
-                        {/* { docids.map(( id ) => {
-                                return Document.findByid( id )
-                                    .then(( doc ) => {
-                                        return <Button block href={ "#/edit/" + doc._id }>{ doc.title }</Button>;
-                                    } );
-                            } ) } */}
+                        {
+                            this.state.buttonSet
+                        }
                     </ButtonGroup>
                     <div className="buttonSet">
                         <Button onClick={ toggleCreate }>Create Document</Button>
@@ -74,7 +109,6 @@ class Home extends React.Component {
                 </div>
             </div>
         );
-        // } );
     }
 }
 

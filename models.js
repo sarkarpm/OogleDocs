@@ -14,7 +14,8 @@ var documentSchema = mongoose.Schema( {
     password: {
         type: String,
         required: true
-    }
+    },
+    contentState: Object
 } );
 
 var User = mongoose.model( 'User', userSchema );

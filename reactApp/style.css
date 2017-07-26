@@ -8,6 +8,7 @@ h1 {
 	justify-content: center;
 }
 
+
 .leftBlock {
 	text-align: left;
 }
@@ -46,13 +47,15 @@ h1 {
     padding: '2px 0';
 }
 .doclist {
+    display: flex;
+    align-content: center;
     width: 75%;
     background-color: blue;
 }
 .homeDiv {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    align-items: center;
     width: 100%;
 }
 .buttonSet {
