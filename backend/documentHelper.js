@@ -7,7 +7,7 @@ function documentHelper( app ) {
         var doc = new Document( {
             title: req.body.title,
             password: req.body.password,
-            contentState: {}
+            contentState: []
         } );
         doc.save();
         User.findById( req.body.userId )
@@ -50,7 +50,7 @@ function documentHelper( app ) {
     app.post('/save', function(req, res){
         Document.findById(req.body.docId)
           .then( doc => {
-              doc.contentState = req.body.contentState;
+              doc.contentState.push(req.body.contentState);
               doc.save();
           })
           .catch(err => {

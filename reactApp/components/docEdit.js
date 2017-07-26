@@ -28,7 +28,7 @@ class DocEdit extends React.Component {
             docId: this.state.docId
         } )
             .then( response => {
-                const loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState ) );
+                const loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState[response.data.doc.contentState.length - 1] ) );
                 this.setState( {
                     editorState: EditorState.createWithContent( loadedContentState ),
                     documentTitle: response.data.doc.title
