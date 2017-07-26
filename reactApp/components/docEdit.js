@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Button } from 'reactstrap';
 import { Editor, EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
@@ -17,38 +17,39 @@ class DocEdit extends React.Component {
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
-            const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
-            this.state.socket.emit('madeChange', {rawDraftContentState});
+            const rawDraftContentState = JSON.stringify( convertToRaw( this.state.editorState.getCurrentContent() ) );
+            this.state.socket.emit( 'madeChange', { rawDraftContentState } );
         };
         this.focus = () => this.refs.editor.focus();
     }
 
     componentWillMount() {
-        axios.post("http://localhost:3000/loadDocument", {
+        axios.post( "http://localhost:3000/loadDocument", {
             docId: this.state.docId
-        })
-        .then(response => {
-            const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
-            this.setState({
-                editorState: EditorState.createWithContent(loadedContentState),
-                documentTitle: response.data.doc.title
-            });
-            this.state.socket.emit('joinedDocument', this.state.docId);
-        })
-        .catch(err => {
-            console.log('error loading document', err);
-        });
+        } )
+            .then( response => {
+                const loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState ) );
+                this.setState( {
+                    editorState: EditorState.createWithContent( loadedContentState ),
+                    documentTitle: response.data.doc.title
+                } );
+                this.state.socket.emit( 'joinedDocument', this.state.docId );
+            } )
+            .catch( err => {
+                console.log( 'error loading document', err );
+            } );
     }
 
     componentWillUnmount() {
-        this.state.socket.emit('leftDocument', this.state.docId);
+        this.state.socket.emit( 'leftDocument', this.state.docId );
     }
 
     render() {
         return (
             <div>
                 <div>
-                    <Link to="/home">Docs Home</Link>
+                    <Button href="#/home">Docs Home</Button>
+                    <Button href={ `#/history/${this.state.docId}` }>Doc History</Button>
                 </div>
                 <div className="editorTitle">
                     <h1>{ this.state.documentTitle }</h1>
@@ -56,10 +57,10 @@ class DocEdit extends React.Component {
                 </div>
                 <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
                 <div className='editor' onClick={ this.focus }>
-                  <Editor customStyleMap={ customStyleMap } editorState={ this.state.editorState } onChange={ this.onChange }
-                      placeholder="Write something colorful..."
-                      ref="editor" blockRenderMap={ extendedBlockRenderMap }
-                  />
+                    <Editor customStyleMap={ customStyleMap } editorState={ this.state.editorState } onChange={ this.onChange }
+                        placeholder="Write something colorful..."
+                        ref="editor" blockRenderMap={ extendedBlockRenderMap }
+                    />
                 </div>
             </div>
         );

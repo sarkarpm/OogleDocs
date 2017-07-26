@@ -10,6 +10,7 @@ import DocEdit from './docEdit';
 import Home from './home';
 import Login from './login';
 import Register from './register';
+import History from './history';
 import io from 'socket.io-client';
 
 class App extends React.Component {
@@ -35,6 +36,7 @@ class App extends React.Component {
             <Router>
                 <Switch>
                     <Route path='/edit/:docid' render={ (props) => <DocEdit socket={this.state.socket} {...props}/> }  />
+                    <Route path='/history/:docid' render={ (props) => <History socket={this.state.socket} {...props}/> }  />
                     <Route path='/home' render={ (props) => <Home socket={this.state.socket} {...props}/> }  />
                     <Route path='/login' render={ (props) => <Login socket={this.state.socket} {...props}/> }  />
                     <Route path='/register' component={ Register } />
