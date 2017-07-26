@@ -44,7 +44,7 @@ class Home extends React.Component {
             if ( res.data.success ) {
                 self.props.history.push( '/edit/' + res.data.resId );
             }
-        } );
+        } ).bind(this);
     }
     logout() {
         axios.get( 'http://localhost:3000/logout' );
@@ -59,7 +59,10 @@ class Home extends React.Component {
                 console.log( 'THIS IS YOUR LIST', res.data.val );
                 const buttons = res.data.val.map( (doc, index) => <Button block key={ index } href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
                 self.setState( { buttonSet: buttons } );
-            } );
+            } )
+            .catch(err => {
+                console.log('error loading documents from database', err);
+            });
     }
 
     render() {
