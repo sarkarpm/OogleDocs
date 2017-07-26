@@ -62,6 +62,7 @@ function documentHelper( app ) {
             .then( doc => {
                 doc.contentState.push( req.body.contentState );
                 doc.save();
+                console.log('DOC WAS SAVED', doc)
             } )
             .catch( err => {
                 console.log( 'error saving document in server', err );
