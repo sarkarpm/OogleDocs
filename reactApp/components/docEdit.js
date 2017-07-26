@@ -15,8 +15,7 @@ class DocEdit extends React.Component {
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
         this.focus = () => this.refs.editor.focus();
-        _.bindAll( this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor',
-        '_toggleFontSize', '_toggleBlockType', 'onChange', '_saveDocument'  );
+        _.bindAll( this, 'handleKeyCommand', 'onChange', '_saveDocument'  );
     }
 
     _saveDocument() {
@@ -58,22 +57,6 @@ class DocEdit extends React.Component {
         return 'not-handled';
     }
 
-    _toggleTypeface( type ) {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, type ) );
-    }
-
-    _toggleColor( toggledColor ) {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledColor ) );
-    }
-
-    _toggleFontSize( toggledFontSize ) {
-        this.onChange( RichUtils.toggleInlineStyle( this.state.editorState, toggledFontSize ) );
-    }
-
-    _toggleBlockType( blockType) {
-        this.onChange(RichUtils.toggleBlockType(this.state.editorState, blockType));
-    }
-
     render() {
         return (
             <div className="container">
@@ -85,11 +68,8 @@ class DocEdit extends React.Component {
                     <p>ID: { this.props.match.params.docid }</p>
                 </div>
                 <Toolbar
-									onToggleTypeface={ this._toggleTypeface }
-									onToggleColor={ this._toggleColor }
-                  onToggleFontSize={ this._toggleFontSize }
-									onToggleBlockType={ this._toggleBlockType }
                   onSaveDocument={ this._saveDocument }
+                  docEdit={ this }
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
