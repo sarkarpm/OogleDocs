@@ -89,7 +89,7 @@ class DocEdit extends React.Component {
 									onToggleColor={ this._toggleColor }
                   onToggleFontSize={ this._toggleFontSize }
 									onToggleBlockType={ this._toggleBlockType }
-                  onSaveDocument= { this._saveDocument }
+                  onSaveDocument={ this._saveDocument }
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor
