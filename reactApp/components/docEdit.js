@@ -1,10 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Editor, EditorState, RichUtils } from 'draft-js';
+import { Editor, EditorState, RichUtils, convertFromRaw, convertToRaw } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import _ from 'underscore';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
+import axios from 'axios';
 
 class DocEdit extends React.Component {
     constructor( props ) {
@@ -14,7 +15,38 @@ class DocEdit extends React.Component {
         };
         this.onChange = ( editorState ) => this.setState( { editorState } );
         this.focus = () => this.refs.editor.focus();
-        _.bindAll( this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor', '_toggleFontSize', '_toggleBlockType', 'onChange' );
+        _.bindAll( this, 'handleKeyCommand', '_toggleTypeface', '_toggleColor',
+        '_toggleFontSize', '_toggleBlockType', 'onChange', '_saveDocument'  );
+    }
+
+    _saveDocument() {
+        const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
+        axios.post("/" /*route needed*/, {
+            contentState: rawDraftContentState //or something like it, depending on schema
+            //TODO authentication details, etc...
+        })
+        .then(response => {
+            console.log('Document successfully saved');
+            //TODO implement a popup window alerting the user that doc has been saved
+        })
+        .catch(err => {
+            console.log('error saving document', err);
+        });
+    }
+
+    componentWillMount() {
+        if (/* TODO user is authenticated and is on a prexisting document url */ false) {
+            axios(/* route needed*/ {
+              // TODO get the saved state from mongo
+            })
+            .then(rawContentState => {
+                const loadedContentState = convertFromRaw( rawContentState );
+                this.setState({editorState: EditorState.createWithContent(loadedContentState)});
+            })
+            .catch(err => {
+                console.log('error loading document', err);
+            });
+        }
     }
 
     handleKeyCommand( command ) {
@@ -57,6 +89,7 @@ class DocEdit extends React.Component {
 									onToggleColor={ this._toggleColor }
                   onToggleFontSize={ this._toggleFontSize }
 									onToggleBlockType={ this._toggleBlockType }
+                  onSaveDocument= { this._saveDocument }
 								/>
                 <div className='editor' onClick={ this.focus }>
                   <Editor

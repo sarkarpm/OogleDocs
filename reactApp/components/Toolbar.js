@@ -46,6 +46,7 @@ class Toolbar extends React.Component {
         return (
 					<div className="toolbar">
 							<ButtonGroup>
+                  <Button onClick={ this.props.onSaveDocument }><FontAwesome name='save' /></Button>
 									<Button onClick={ () => this.props.onToggleTypeface('BOLD') }><FontAwesome name='bold' /></Button>
 									<Button onClick={ () => this.props.onToggleTypeface('ITALIC')  }><FontAwesome name='italic' /></Button>
 									<Button onClick={ () => this.props.onToggleTypeface('UNDERLINE')  }><FontAwesome name='underline' /></Button>
