@@ -15,7 +15,8 @@ class DocEdit extends React.Component {
             socket: this.props.socket,
             docId: this.props.match.params.docid,
             documentTitle: '',
-            createModal: false
+            createModal: false,
+            setInterval: ""
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
@@ -24,7 +25,9 @@ class DocEdit extends React.Component {
             this.state.socket.emit('madeChange', rawDraftContentState);
         };
         this.focus = () => this.refs.editor.focus();
+        
     }
+
 
     toggleCreate() {
         this.setState( {
@@ -37,6 +40,7 @@ class DocEdit extends React.Component {
         //console.log("this.state", this.state)
         //console.log("this.state.editorstate", this.state.editorState)
         //console.log("contentState", rawDraftContentState)
+        console.log('is saving every 30 seconds')
         axios.post('http://localhost:3000/save', {
             contentState: rawDraftContentState,
             docId: this.state.docId
@@ -70,6 +74,12 @@ class DocEdit extends React.Component {
         this.state.socket.on('message', message => {
             console.log('message in doc: ', message);
         });
+        var self = this;
+        // this.state.socket.on('roomIsReady', (ready) => {
+        //     saveInterval = setInterval(this._saveDocument.bind(this), 30000)
+        // })
+        this.setState({saveInterval: setInterval(this._saveDocument.bind(this), 30000)});
+        //console.log('saveinterval', this.state.saveInterval)
     }
 
     componentDidMount(){
@@ -89,6 +99,8 @@ class DocEdit extends React.Component {
     componentWillUnmount() {
         //console.log("editorState WHEN U LEAVE", this.state.editorState)
         //this._saveDocument();
+        clearInterval(this.state.saveInterval);
+        //console.log('clearInterval', this.state.saveInterval)
         this.state.socket.emit( 'leftDocument', this.state.docId );
     }
 
