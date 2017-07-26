@@ -36,11 +36,20 @@ class Home extends React.Component {
     }
     joinDocument( event ) {
         event.preventDefault();
+        axios.post( 'http://localhost:3000/joindoc', {
+            password: document.getElementById( 'joinPw' ).value,
+            docId: document.getElementById( 'docId' ).value,
+            userId: window.sessionStorage.getItem( 'userId' )
+        } ).then(( res ) => {
+            if ( res.data.success ) {
+                self.props.history.push( '/edit/' + res.data.resId );
+            }
+        } );
     }
-    logout () {
-        axios.get( 'http://localhost:3000/logout');
+    logout() {
+        axios.get( 'http://localhost:3000/logout' );
         window.sessionStorage.clear();
-        this.props.history.push('/login');
+        this.props.history.push( '/login' );
     }
 
     componentDidMount() {
@@ -48,8 +57,8 @@ class Home extends React.Component {
         axios.post( 'http://localhost:3000/doclist', { UId: window.sessionStorage.getItem( 'userId' ) } )
             .then( res => {
                 console.log( 'THIS IS YOUR LIST', res.data.val );
-                const buttons = res.data.val.map( doc => <Button block key={doc._id} href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
-                self.setState({buttonSet: buttons});
+                const buttons = res.data.val.map( doc => <Button block key={ doc._id } href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
+                self.setState( { buttonSet: buttons } );
             } );
     }
 
@@ -58,7 +67,7 @@ class Home extends React.Component {
         const toggleJoin = this.toggleJoin.bind( this );
         return (
             <div>
-                <Button onClick={this.logout.bind(this)}>Logout</Button>
+                <Button onClick={ this.logout.bind( this ) }>Logout</Button>
                 <h1>Documents Home</h1>
                 <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
                     <ModalHeader toggle={ toggleCreate }>Create Document</ModalHeader>
@@ -81,10 +90,10 @@ class Home extends React.Component {
                 <Modal isOpen={ this.state.joinModal } toggle={ toggleJoin } backdrop={ true }>
                     <ModalHeader toggle={ toggleJoin }>Join Document</ModalHeader>
                     <ModalBody>
-                        <Form onSubmit={ this.joinDocument }>
+                        <Form onSubmit={ this.joinDocument.bind(this) }>
                             <Input
                                 type="text"
-                                id="docid"
+                                id="docId"
                                 placeholder="Document ID"
                             />
                             <Input

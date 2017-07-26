@@ -82,6 +82,21 @@ app.post( '/newdoc', function ( req, res ) {
         } );
     res.json( { resId: doc._id } );
 } );
+app.post( '/joindoc', function ( req, res ) {
+    Document.findById( req.body.docId )
+        .then( doc => {
+            if ( req.body.password === doc.password ) {
+                User.findById( req.body.userId )
+                    .then( user => {
+                        user.documents.push( doc._id );
+                        user.save();
+                    } );
+                res.json( { success: true, resId: doc._id } );
+            } else {
+                res.json( { success: false });
+            }
+        } );
+} );
 
 app.post( '/doclist', function ( req, res ) {
     User.findById( req.body.UId )
@@ -96,9 +111,9 @@ app.post( '/doclist', function ( req, res ) {
         } );
 } );
 
-app.get( '/logout', function(req, res) {
+app.get( '/logout', function ( req, res ) {
     req.logout();
-});
+} );
 
 app.listen( 3000, function () {
     console.log( 'Backend server for Electron App running on port 3000!' );
