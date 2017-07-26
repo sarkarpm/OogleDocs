@@ -16,7 +16,6 @@ class Toolbar extends React.Component {
         };
         _.bindAll( this, 'handleColorClick', 'handleColorClose', 'toggleFontSizeDropdown', 'handleChangeComplete' );
         _.bindAll(this.props.docEdit, 'onChange');
-        console.log(this.props.docEdit);
     }
 
     handleColorClick(){
