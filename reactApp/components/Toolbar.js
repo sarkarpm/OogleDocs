@@ -4,8 +4,9 @@ import BLOCKS from '../labels/blockLabels';
 import FONT_SIZES from '../labels/fontLabels';
 var FontAwesome = require('react-fontawesome');
 import { CirclePicker } from 'react-color';
-import { RichUtils } from 'draft-js';
+import { RichUtils, convertToRaw } from 'draft-js';
 import _ from 'underscore';
+import axios from 'axios';
 
 class Toolbar extends React.Component {
     constructor(props) {
@@ -54,6 +55,21 @@ class Toolbar extends React.Component {
         this.props.docEdit.onChange(RichUtils.toggleBlockType(this.props.docEdit.state.editorState, blockType));
     }
 
+    _saveDocument() {
+        const rawDraftContentState = JSON.stringify( convertToRaw(this.props.docEdit.state.editorState.getCurrentContent()) );
+        axios.post('http://localhost:3000/save', {
+            contentState: rawDraftContentState,
+            docId: this.props.docEdit.props.match.params.docid
+        })
+        .then(response => {
+            console.log('Document successfully saved');
+            //TODO implement a popup window alerting the user that doc has been saved
+        })
+        .catch(err => {
+            console.log('error saving document', err);
+        });
+    }
+
     render(){
         const popover = {
             position: 'absolute',
@@ -64,7 +80,7 @@ class Toolbar extends React.Component {
         return (
 					<div className="toolbar">
 							<ButtonGroup>
-                  <Button onClick={ this.props.onSaveDocument }><FontAwesome name='save' /></Button>
+                  <Button onClick={ () => this._saveDocument() }><FontAwesome name='save' /></Button>
 									<Button onClick={ () => this._toggleTypeface('BOLD') }><FontAwesome name='bold' /></Button>
 									<Button onClick={ () => this._toggleTypeface('ITALIC')  }><FontAwesome name='italic' /></Button>
 									<Button onClick={ () => this._toggleTypeface('UNDERLINE')  }><FontAwesome name='underline' /></Button>

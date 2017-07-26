@@ -57,7 +57,7 @@ class Home extends React.Component {
         axios.post( 'http://localhost:3000/doclist', { UId: window.sessionStorage.getItem( 'userId' ) } )
             .then( res => {
                 console.log( 'THIS IS YOUR LIST', res.data.val );
-                const buttons = res.data.val.map( doc => <Button block key={ doc._id } href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
+                const buttons = res.data.val.map( (doc, index) => <Button block key={ index } href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
                 self.setState( { buttonSet: buttons } );
             } );
     }

@@ -1,9 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Editor, EditorState, RichUtils, convertFromRaw, convertToRaw } from 'draft-js';
+import { Editor, EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
-import _ from 'underscore';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
 import axios from 'axios';
 
@@ -11,53 +10,38 @@ class DocEdit extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            editorState: EditorState.createEmpty()
+            editorState: EditorState.createEmpty(),
+            socket: this.props.socket,
+            docId: this.props.match.params.docid,
+            documentTitle: ''
         };
-        this.onChange = ( editorState ) => this.setState( { editorState } );
+        this.onChange = ( editorState ) => {
+            this.setState( { editorState } );
+            const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
+            this.state.socket.emit('madeChange', {rawDraftContentState});
+        };
         this.focus = () => this.refs.editor.focus();
-        _.bindAll( this, 'handleKeyCommand', 'onChange', '_saveDocument'  );
-    }
-
-    _saveDocument() {
-        const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
-        axios.post('http://localhost:3000/save' /*route needed*/, {
-            contentState: rawDraftContentState,
-            docId: this.props.match.params.docid //or something like it, depending on schema
-            //TODO authentication details, etc...
-        })
-        .then(response => {
-            console.log('Document successfully saved');
-            //TODO implement a popup window alerting the user that doc has been saved
-        })
-        .catch(err => {
-            console.log('error saving document', err);
-        });
     }
 
     componentWillMount() {
-         /* TODO get user id, authentication info, etc  */
         axios.post("http://localhost:3000/loadDocument", {
-              docId: this.props.match.params.docid
-            })
-            .then(response => {
-                //console.log(response.data.success);
-                console.log("content from data", response.data.doc.contentState);
-                const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
-                this.setState({editorState: EditorState.createWithContent(loadedContentState)});
-            })
-            .catch(err => {
-                console.log('error loading document', err);
+            docId: this.state.docId
+        })
+        .then(response => {
+            const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
+            this.setState({
+                editorState: EditorState.createWithContent(loadedContentState),
+                documentTitle: response.data.doc.title
             });
-        
+            this.state.socket.emit('joinedDocument', this.state.docId);
+        })
+        .catch(err => {
+            console.log('error loading document', err);
+        });
     }
 
-    handleKeyCommand( command ) {
-        const newState = RichUtils.handleKeyCommand( this.state.editorState, command );
-        if ( newState ) {
-            this.onChange( newState );
-            return 'handled';
-        }
-        return 'not-handled';
+    componentWillUnmount() {
+        this.state.socket.emit('leftDocument', this.state.docId);
     }
 
     render() {
@@ -67,22 +51,14 @@ class DocEdit extends React.Component {
                     <Link to="/home">Docs Home</Link>
                 </div>
                 <div className="editorTitle">
-                    <h1>{ this.props.match.params.docid }</h1>
-                    <p>ID: { this.props.match.params.docid }</p>
+                    <h1>{ this.state.documentTitle }</h1>
+                    <p>ID: { this.state.docId }</p>
                 </div>
-                <Toolbar
-                  onSaveDocument={ this._saveDocument }
-                  docEdit={ this }
-								/>
+                <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
                 <div className='editor' onClick={ this.focus }>
-                  <Editor
-                      customStyleMap={ customStyleMap }
-                      editorState={ this.state.editorState }
-                      onChange={ this.onChange }
-                      handleKeyCommand={ this.handleKeyCommand }
+                  <Editor customStyleMap={ customStyleMap } editorState={ this.state.editorState } onChange={ this.onChange }
                       placeholder="Write something colorful..."
-                      ref="editor"
-											blockRenderMap={ extendedBlockRenderMap }
+                      ref="editor" blockRenderMap={ extendedBlockRenderMap }
                   />
                 </div>
             </div>

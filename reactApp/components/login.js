@@ -4,15 +4,19 @@ var axios = require( 'axios' );
 
 const Login = ( props ) => {
     const login = () => {
+        console.log('props', props);
+        const username = document.getElementById( "username" ).value;
+        const password = document.getElementById( "password" ).value;
         axios.post( 'http://localhost:3000/login', {
-            username: document.getElementById( "username" ).value,
-            password: document.getElementById( "password" ).value
+            username,
+            password
         } )
             .then( function ( response ) {
                 console.log( "RESPONSE", response.data );
                 if ( response.data.success ) {
                     window.sessionStorage.setItem( "userId", response.data.userId );
                     props.history.push( "/home" );
+                    props.socket.emit('login', JSON.stringify({username, userId: response.data.userId }));
                 }
                 console.log( "session id", window.sessionStorage.getItem( 'userId' ) );
             } )
