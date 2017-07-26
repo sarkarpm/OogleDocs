@@ -20,8 +20,9 @@ class DocEdit extends React.Component {
 
     _saveDocument() {
         const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
-        axios.post("/" /*route needed*/, {
-            contentState: rawDraftContentState //or something like it, depending on schema
+        axios.post('http://localhost:3000/save' /*route needed*/, {
+            contentState: rawDraftContentState,
+            docId: this.props.match.params.docid //or something like it, depending on schema
             //TODO authentication details, etc...
         })
         .then(response => {
@@ -34,19 +35,20 @@ class DocEdit extends React.Component {
     }
 
     componentWillMount() {
-        const userIsAuthenticated = true; /* TODO get user id, authentication info, etc  */
-        if ( userIsAuthenticated ) {
-            axios(/* route needed*/ {
-              // TODO get the saved state from mongo
+         /* TODO get user id, authentication info, etc  */
+        axios.post("http://localhost:3000/loadDocument", {
+              docId: this.props.match.params.docid
             })
-            .then(rawContentState => {
-                const loadedContentState = convertFromRaw( rawContentState );
+            .then(response => {
+                //console.log(response.data.success);
+                console.log("content from data", response.data.doc.contentState);
+                const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
                 this.setState({editorState: EditorState.createWithContent(loadedContentState)});
             })
             .catch(err => {
                 console.log('error loading document', err);
             });
-        }
+        
     }
 
     handleKeyCommand( command ) {

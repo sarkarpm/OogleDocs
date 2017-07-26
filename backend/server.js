@@ -111,6 +111,21 @@ app.post( '/doclist', function ( req, res ) {
         } );
 } );
 
+app.post('/save', function(req, res){
+    Document.findById(req.body.docId)
+        .then( doc => {
+            doc.contentState = req.body.contentState;
+            doc.save();
+        })
+})
+
+app.post('/loadDocument', function(req, res){
+    Document.findById(req.body.docId)
+        .then( doc => {
+            res.json( {success: true, doc})
+        })
+})
+
 app.get( '/logout', function ( req, res ) {
     req.logout();
 } );
