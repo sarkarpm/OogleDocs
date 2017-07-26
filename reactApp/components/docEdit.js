@@ -60,7 +60,7 @@ class DocEdit extends React.Component {
 
     render() {
         return (
-            <div className="container">
+            <div>
                 <div>
                     <Link to="/home">Docs Home</Link>
                 </div>

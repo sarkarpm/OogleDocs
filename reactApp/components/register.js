@@ -1,56 +1,50 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Button, Input, Form } from 'reactstrap';
+var axios = require( 'axios' );
 
-const Register = () => {
-    let input;
-    let username;
-    let password;
-    let firstName;
-    let lastName;
+const Register = ( props ) => {
+    const register = () => {
+        axios.post( 'http://localhost:3000/register', {
+            username: document.getElementById( "username" ).value,
+            password: document.getElementById( "password" ).value,
+            firstName: document.getElementById( "firstName" ).value,
+            lastName: document.getElementById( "lastName" ).value
+        } )
+            .then( function ( response ) {
+                console.log( "RESPONSE", response );
+                props.history.push( '/login' );
+            } )
+            .catch( function ( err ) {
+                console.log( err );
+            } );
+    };
+
     return (
-        <div className="container">
+        <div>
             <h1>Register</h1>
-            <div>
-                <input
+            <Form>
+                <Input
+                    id="firstName"
                     type="text"
                     placeholder="First Name"
-                    value={ firstName }
-                    ref={ node => { input = node; } }
-                    onChange={ () => firstName = input.value }
                 />
-            </div>
-            <div>
-                <input
+                <Input
+                    id="lastName"
                     type="text"
                     placeholder="Last Name"
-                    value={ lastName }
-                    ref={ node => { input = node; } }
-                    onChange={ () => lastName = input.value }
                 />
-            </div>
-            <div>
-                <input
+                <Input
+                    id="username"
                     type="text"
                     placeholder="Username"
-                    value={ username }
-                    ref={ node => { input = node; } }
-                    onChange={ () => username = input.value }
                 />
-            </div>
-            <div>
-                <input type="password"
+                <Input type="password"
+                    id="password"
                     placeholder="Password"
-                    value={ password }
-                    ref={ node => { input = node; } }
-                    onChange={ () => password = input.value }
                 />
-            </div>
-            <div>
-                <button onClick={ () => {
-                    // TODO: Create a mongo user and send it to the database
-                } }>Register</button>
-                <Link to="/login">Login</Link>
-            </div>
+            </Form>
+            <Button onClick={ register }>Register</Button>
+            <Button href="#/login">Login</Button>
         </div>
     );
 };

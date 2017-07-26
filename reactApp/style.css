@@ -1,6 +1,3 @@
-.container {
-	background-color: #dce0e8;
-}
 .editorBox {
 	border: solid;
 	margin: 10px;
@@ -10,6 +7,7 @@ h1 {
 	display: flex;
 	justify-content: center;
 }
+
 
 .leftBlock {
 	text-align: left;
@@ -23,28 +21,44 @@ h1 {
 	text-align: right
 }
 .root {
-        font-family: '\'Georgia\', serif';
-        font-size: 14;
-        padding: 20;
-        width: 600;
-    }
-    .editor {
-        border-top: '1px solid #ddd';
-        cursor: 'text';
-        font-size: 16;
-        margin-top: 20;
-        min-height: 400;
-        padding-top: 20;
-    }
-    .controls {
-        font-family: '\'Helvetica\', sans-serif';
-        font-size: 14;
-        margin-bottom: 10;
-        user-select: 'none';
-    }
-    .styleButton {
-        color: '#999';
-        cursor: 'pointer';
-        margin-right: 16;
-        padding: '2px 0';
-    }
+    font-family: '\'Georgia\', serif';
+    font-size: 14;
+    padding: 20;
+    width: 600;
+}
+.editor {
+    border-top: '1px solid #ddd';
+    cursor: 'text';
+    font-size: 16;
+    margin-top: 20;
+    min-height: 400;
+    padding-top: 20;
+}
+.controls {
+    font-family: '\'Helvetica\', sans-serif';
+    font-size: 14;
+    margin-bottom: 10;
+    user-select: 'none';
+}
+.styleButton {
+    color: '#999';
+    cursor: 'pointer';
+    margin-right: 16;
+    padding: '2px 0';
+}
+.doclist {
+    display: flex;
+    align-content: center;
+    width: 75%;
+    background-color: blue;
+}
+.homeDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+.buttonSet {
+    display: flex;
+    justify-content: center;
+}

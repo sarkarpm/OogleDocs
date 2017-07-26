@@ -10,11 +10,12 @@ var userSchema = mongoose.Schema( {
 } );
 
 var documentSchema = mongoose.Schema( {
-    author: String,
+    title: String,
     password: {
         type: String,
         required: true
-    }
+    },
+    contentState: Object
 } );
 
 var User = mongoose.model( 'User', userSchema );
@@ -23,4 +24,4 @@ var Document = mongoose.model( 'Document', documentSchema );
 module.exports = {
     User: User,
     Document: Document
-}
+};

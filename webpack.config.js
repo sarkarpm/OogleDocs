@@ -22,10 +22,13 @@ module.exports = {
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
             }
-        ]
+        ],
     },
+
     stats: {
         colors: true
     },
     devtool: 'source-map'
 };
+
+//Webpack has been initialised using a configuration object that does not match the API schema

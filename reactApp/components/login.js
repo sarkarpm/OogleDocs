@@ -1,37 +1,42 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Button, Input, Form } from 'reactstrap';
+var axios = require( 'axios' );
 
-const Login = () => {
-    let input;
-    let username;
-    let password;
+const Login = ( props ) => {
+    const login = () => {
+        axios.post( 'http://localhost:3000/login', {
+            username: document.getElementById( "username" ).value,
+            password: document.getElementById( "password" ).value
+        } )
+            .then( function ( response ) {
+                console.log( "RESPONSE", response.data );
+                if ( response.data.success ) {
+                    window.sessionStorage.setItem( "userId", response.data.userId );
+                    props.history.push( "/home" );
+                }
+                console.log( "session id", window.sessionStorage.getItem( 'userId' ) );
+            } )
+            .catch( function ( err ) {
+                console.log( "err", err );
+            } );
+    };
+
     return (
-        <div className="container">
+        <div>
             <h1>Welcome to OogleDocs!</h1>
-            <div>
-                <input
+            <Form>
+                <Input
                     type="text"
+                    id="username"
                     placeholder="Username"
-                    value={ username }
-                    ref={ node => { input = node; } }
-                    onChange={ () => username = input.value }
                 />
-            </div>
-            <div>
-                <input type="password"
+                <Input type="password"
+                    id="password"
                     placeholder="Password"
-                    value={ password }
-                    ref={ node => { input = node; } }
-                    onChange={ () => password = input.value }
                 />
-            </div>
-            <div>
-                <button onClick={ () => {
-                    // TODO: Create post request to the database
-                } }>Login</button>
-                <Link to="/register">Register</Link>
-                <Link to="/home">TEMP LINK</Link>
-            </div>
+            </Form>
+            <Button onClick={login}>Login</Button>
+            <Button href="#/register">Register</Button>
         </div>
     );
 };
