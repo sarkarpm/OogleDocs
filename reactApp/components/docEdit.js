@@ -34,7 +34,8 @@ class DocEdit extends React.Component {
     }
 
     componentWillMount() {
-        if (/* TODO user is authenticated and is on a prexisting document url */ false) {
+        const userIsAuthenticated = true; /* TODO get user id, authentication info, etc  */
+        if ( userIsAuthenticated ) {
             axios(/* route needed*/ {
               // TODO get the saved state from mongo
             })
