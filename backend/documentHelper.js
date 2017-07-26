@@ -41,7 +41,6 @@ function documentHelper( app ) {
                     return Document.findById( id );
                 } );
                 Promise.all( docmap ).then( val => {
-                    // console.log( 'THESE ARE VALS', val );
                     res.json( { success: true, val } );
                 } );
             } );

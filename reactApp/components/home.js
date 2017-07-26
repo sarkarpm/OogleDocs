@@ -36,6 +36,7 @@ class Home extends React.Component {
     }
     joinDocument( event ) {
         event.preventDefault();
+        const self = this;
         axios.post( 'http://localhost:3000/joindoc', {
             password: document.getElementById( 'joinPw' ).value,
             docId: document.getElementById( 'docId' ).value,
@@ -58,7 +59,10 @@ class Home extends React.Component {
             .then( res => {
                 const buttons = res.data.val.map( (doc, index) => <Button block key={ index } href={ "#/edit/" + doc._id }>{ doc.title }</Button> );
                 self.setState( { buttonSet: buttons } );
-            } );
+            } )
+            .catch(err => {
+                console.log('error loading documents from database', err);
+            });
     }
 
     render() {
