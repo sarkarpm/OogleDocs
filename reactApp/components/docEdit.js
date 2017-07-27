@@ -20,8 +20,8 @@ class DocEdit extends React.Component {
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
             //console.log('editor state in on change', editorState);
-            const rawDraftContentState = JSON.stringify( convertToRaw(editorState.getCurrentContent()) );
-            this.state.socket.emit('madeChange', rawDraftContentState);
+            const rawDraftContentState = JSON.stringify( convertToRaw( editorState.getCurrentContent() ) );
+            this.state.socket.emit( 'madeChange', rawDraftContentState );
         };
         this.focus = () => this.refs.editor.focus();
     }
@@ -33,57 +33,57 @@ class DocEdit extends React.Component {
     }
 
     _saveDocument() {
-        const rawDraftContentState = JSON.stringify( convertToRaw(this.state.editorState.getCurrentContent()) );
+        const rawDraftContentState = JSON.stringify( convertToRaw( this.state.editorState.getCurrentContent() ) );
         //console.log("this.state", this.state)
         //console.log("this.state.editorstate", this.state.editorState)
         //console.log("contentState", rawDraftContentState)
-        axios.post('http://localhost:3000/save', {
+        axios.post( 'http://localhost:3000/save', {
             contentState: rawDraftContentState,
             docId: this.state.docId
-        })
-        .then(response => {
-            console.log('Document successfully saved');
-            //TODO implement a popup window alerting the user that doc has been saved
-        })
-        .catch(err => {
-            console.log('error saving document', err);
-        });
+        } )
+            .then( response => {
+                console.log( 'Document successfully saved' );
+                //TODO implement a popup window alerting the user that doc has been saved
+            } )
+            .catch( err => {
+                console.log( 'error saving document', err );
+            } );
     }
 
     componentWillMount() {
         axios.post( "http://localhost:3000/loadDocument", {
             docId: this.state.docId
-        })
-        .then(response => {
-            const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState[response.data.doc.contentState.length - 1]) );
-            //console.log('loadedContentState', loadedContentState);
-            this.setState({
-                editorState: EditorState.createWithContent(loadedContentState),
-                documentTitle: response.data.doc.title
-            });
-            this.state.socket.emit('joinedDocument', this.state.docId);
-        })
-        .catch(err => {
-            console.log('error loading document', err);
-        });
+        } )
+            .then( response => {
+                const loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState[response.data.doc.contentState.length - 1] ) );
+                //console.log('loadedContentState', loadedContentState);
+                this.setState( {
+                    editorState: EditorState.createWithContent( loadedContentState ),
+                    documentTitle: response.data.doc.title
+                } );
+                this.state.socket.emit( 'joinedDocument', this.state.docId );
+            } )
+            .catch( err => {
+                console.log( 'error loading document', err );
+            } );
 
-        this.state.socket.on('message', message => {
-            console.log('message in doc: ', message);
-        });
+        this.state.socket.on( 'message', message => {
+            console.log( 'message in doc: ', message );
+        } );
     }
 
-    componentDidMount(){
+    componentDidMount() {
         var self = this;
-        this.state.socket.on('changeListener', (changedDoc) => {
-            self.updateContentFromSocket(changedDoc);
-        });
+        this.state.socket.on( 'changeListener', ( changedDoc ) => {
+            self.updateContentFromSocket( changedDoc );
+        } );
     }
 
-    updateContentFromSocket(changedDoc) {
+    updateContentFromSocket( changedDoc ) {
         //console.log('changedDoc', changedDoc);
-        changedDoc = convertFromRaw( JSON.parse(changedDoc) );
+        changedDoc = convertFromRaw( JSON.parse( changedDoc ) );
         //console.log('changedDoc', changedDoc);
-        this.setState({editorState: EditorState.createWithContent(changedDoc)});
+        this.setState( { editorState: EditorState.createWithContent( changedDoc ) } );
     }
 
     componentWillUnmount() {
@@ -99,24 +99,29 @@ class DocEdit extends React.Component {
                 <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
                     <ModalHeader toggle={ toggleCreate }>Do you want to save?</ModalHeader>
                     <ModalBody>
-                        <Button href="#/home" type="submit" onClick={ this._saveDocument.bind(this) }>Save</Button>
+                        <Button href="#/home" type="submit" onClick={ this._saveDocument.bind( this ) }>Save</Button>
                         <Button href="#/home" type="submit">Leave without Saving</Button>
                     </ModalBody>
                 </Modal>
-                <div>
+                <div className="backButton">
                     <Button onClick={ toggleCreate }>Docs Home</Button>
-                    <Button href={ `#/history/${this.state.docId}` }>Doc History</Button>
                 </div>
-                <div className="editorTitle">
+                <div>
                     <h1>{ this.state.documentTitle }</h1>
                     <p>ID: { this.state.docId }</p>
                 </div>
                 <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
                 <div className='editor' onClick={ this.focus }>
-                    <Editor customStyleMap={ customStyleMap } editorState={ this.state.editorState } onChange={ this.onChange }
+                    <Editor
+                        customStyleMap={ customStyleMap }
+                        editorState={ this.state.editorState }
+                        onChange={ this.onChange }
                         placeholder="Write something colorful..."
                         ref="editor" blockRenderMap={ extendedBlockRenderMap }
                     />
+                </div>
+                <div className="buttonLine">
+                    <Button href={ `#/history/${ this.state.docId }` }>Doc History</Button>
                 </div>
             </div>
         );

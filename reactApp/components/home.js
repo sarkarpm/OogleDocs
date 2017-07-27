@@ -70,7 +70,7 @@ class Home extends React.Component {
         const toggleJoin = this.toggleJoin.bind( this );
         return (
             <div>
-                <Button onClick={ this.logout.bind( this ) }>Logout</Button>
+                <Button className="backButton" onClick={ this.logout.bind( this ) }>Logout</Button>
                 <h1>Documents Home</h1>
                 <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
                     <ModalHeader toggle={ toggleCreate }>Create Document</ModalHeader>
@@ -108,13 +108,13 @@ class Home extends React.Component {
                         </Form>
                     </ModalBody>
                 </Modal>
-                <div className='homeDiv'>
+                <div className='body'>
                     <ButtonGroup vertical className='doclist'>
                         {
                             this.state.buttonSet
                         }
                     </ButtonGroup>
-                    <div className="buttonSet">
+                    <div className="buttonLine">
                         <Button onClick={ toggleCreate }>Create Document</Button>
                         <Button onClick={ toggleJoin }>Join Document</Button>
                     </div>
