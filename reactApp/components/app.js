@@ -16,29 +16,32 @@ import io from 'socket.io-client';
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            socket: io('http://localhost:3000')
-        };
+        this.socket = io('http://localhost:3000');
     }
 
     componentDidMount() {
-        this.state.socket.on('connect', () => {
-            console.log('connected');
+        this.socket.on('login', (msg) => {
+            console.log(msg);
         });
+        //
+        // session.clearCache(cb => {
+        //     console.log('cache cleared');
+        // });
+        //
+        // session.clearStorageData(cb => {
+        //     console.log('storage data cleared');
+        // });
 
-        this.state.socket.on('errorMessage', message => {
-            alert(message);
-        });
     }
 
     render() {
         return (
             <Router>
                 <Switch>
-                    <Route path='/edit/:docid' render={ (props) => <DocEdit socket={this.state.socket} {...props}/> }  />
-                    <Route path='/history/:docid' render={ (props) => <History socket={this.state.socket} {...props}/> }  />
-                    <Route path='/home' render={ (props) => <Home socket={this.state.socket} {...props}/> }  />
-                    <Route path='/login' render={ (props) => <Login socket={this.state.socket} {...props}/> }  />
+                    <Route path='/edit/:docid' render={ (props) => <DocEdit socket={this.socket} {...props}/> }  />
+                    <Route path='/history/:docid' render={ (props) => <History socket={this.socket} {...props}/> }  />
+                    <Route path='/home' render={ (props) => <Home socket={this.socket} {...props}/> }  />
+                    <Route path='/login' render={ (props) => <Login socket={this.socket} {...props}/> }  />
                     <Route path='/register' component={ Register } />
                     <Route path='/' render={ () => <Redirect to='/login' /> } />
                 </Switch>

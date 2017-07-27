@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from 'reactstrap';
-import { Editor, EditorState, convertFromRaw, convertToRaw } from 'draft-js';
+import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
@@ -11,59 +11,101 @@ class DocEdit extends React.Component {
         super( props );
         this.state = {
             editorState: EditorState.createEmpty(),
-            socket: this.props.socket,
             docId: this.props.match.params.docid,
             documentTitle: ''
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
-            console.log('editor state in on change', editorState);
             const rawDraftContentState = JSON.stringify( convertToRaw(editorState.getCurrentContent()) );
-            this.state.socket.emit('madeChange', rawDraftContentState);
+            this.props.socket.emit('madeChange', rawDraftContentState);
+            const newSelection = editorState.getSelection();
+            if (newSelection) {
+                const selectionInfo = {
+                    anchorKey: newSelection.getAnchorKey(),
+                    anchorOffset: newSelection.getAnchorOffset(),
+                    focusKey: newSelection.getFocusKey(),
+                    focusOffset: newSelection.getFocusOffset(),
+                    isBackward: newSelection.isBackward
+                };
+                this.props.socket.emit('madeSelection', JSON.stringify(selectionInfo));
+            }
         };
         this.focus = () => this.refs.editor.focus();
     }
 
     componentWillMount() {
-        axios.post( "http://localhost:3000/loadDocument", {
-            docId: this.state.docId
-        })
-        .then(response => {
-            const loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
-            console.log('loadedContentState', loadedContentState);
-            this.setState({
-                editorState: EditorState.createWithContent(loadedContentState),
-                documentTitle: response.data.doc.title
-            });
-            this.state.socket.emit('joinedDocument', this.state.docId);
-        })
-        .catch(err => {
-            console.log('error loading document', err);
-        });
-
-        this.state.socket.on('message', message => {
-            console.log('message in doc: ', message);
-        });
-
-
-    }
-
-    componentDidMount(){
         var self = this;
-        this.state.socket.on('changeListener', (changedDoc) => {
+        this.props.socket.emit('joinDocument', this.state.docId);
+        this.props.socket.on('roomStatus', (roomStatus) => {
+            console.log('room status', roomStatus);
+        });
+        this.props.socket.on('userColor', (userColor) => {
+            console.log('userColor', userColor);
+        });
+        this.props.socket.on('changeListener', (changedDoc) => {
             self.updateContentFromSocket(changedDoc);
+        });
+        this.props.socket.on('renderSelection', (newSelection) => {
+            console.log('newS', newSelection);
+            const userColor = 'cursor' + newSelection.userColor;
+            newSelection = newSelection.ranges;
+            const updateSelection = new SelectionState({
+                anchorKey: newSelection.anchorKey,
+                anchorOffset: newSelection.anchorOffset,
+                focusKey: newSelection.focusKey,
+                focusOffset: Math.abs(newSelection.anchorOffset !== newSelection.focusOffset) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
+                isBackward: newSelection.isBackward
+            });
+            let newEditorState = EditorState.acceptSelection(this.state.editorState, updateSelection);
+            newEditorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
+            let contentWithCursor = newEditorState.getCurrentContent();
+            console.log('userColor', userColor);
+            contentWithCursor = Modifier.applyInlineStyle(
+              contentWithCursor,
+              updateSelection,
+              userColor
+            );
+
+            console.log(contentWithCursor);
+
+            this.setState({editorState: EditorState.createWithContent(contentWithCursor)});
+        });
+
+        this.props.socket.on('currentState', (currentState) => {
+            axios.post( "http://localhost:3000/loadDocument", {
+                docId: this.state.docId
+            })
+          .then(response => {
+              let loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
+              if (currentState) {
+                  loadedContentState = convertFromRaw( JSON.parse(currentState) );
+              } else {
+                  loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
+              }
+              this.setState({
+                  editorState: EditorState.createWithContent(loadedContentState),
+                  documentTitle: response.data.doc.title
+              });
+          })
+          .catch(err => {
+              console.log('error loading document', err);
+          });
+
         });
     }
 
     updateContentFromSocket(changedDoc) {
-        console.log('changedDoc', changedDoc);
         changedDoc = convertFromRaw( JSON.parse(changedDoc) );
-        console.log('changedDoc', changedDoc);
         this.setState({editorState: EditorState.createWithContent(changedDoc)});
     }
 
     componentWillUnmount() {
-        this.state.socket.emit( 'leftDocument', this.state.docId );
+        this.props.socket.emit( 'leaveDocument', this.state.docId );
+        this.props.socket.removeListener('changeListener');
+        this.props.socket.removeListener('message ');
+        this.props.socket.removeListener('docInfo');
+        this.props.socket.removeListener('userColor');
+        this.props.socket.removeListener('renderSelection');
     }
 
     render() {
