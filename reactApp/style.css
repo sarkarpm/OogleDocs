@@ -3,7 +3,7 @@
 	margin: 10px;
 	margin-bottom: 10px;
 }
-h1 {
+h1, p {
 	display: flex;
 	justify-content: center;
 }
@@ -26,13 +26,17 @@ h1 {
     padding: 20;
     width: 600;
 }
-.editor {
-    border-top: '1px solid #ddd';
-    cursor: 'text';
+.editor :global(.public-DraftEditor-content) {
+    box-shadow: 0px 0px 20px 1px grey;
+    padding: 5px;
+    cursor: text;
     font-size: 16;
-    margin-top: 20;
-    min-height: 400;
-    padding-top: 20;
+    width: 85%;
+    height: 65vh;
+    margin-top: 10px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-y: scroll;
 }
 .controls {
     font-family: '\'Helvetica\', sans-serif';
@@ -51,14 +55,29 @@ h1 {
     align-content: center;
     width: 75%;
     background-color: blue;
+    margin: 1%;
+    border-radius: 5px;
 }
-.homeDiv {
+.body {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
 }
-.buttonSet {
+.buttonLine {
     display: flex;
     justify-content: center;
+    margin: 1%;
+}
+.backButton {
+    margin: 10px;
+}
+.toolbar {
+    display: flex;
+    justify-content: center;
+}
+.form {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
 }
