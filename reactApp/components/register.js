@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Input, Form } from 'reactstrap';
+import { Button, Input, ListGroup, ListGroupItem } from 'reactstrap';
 var axios = require( 'axios' );
 
 const Register = ( props ) => {
@@ -22,29 +22,41 @@ const Register = ( props ) => {
     return (
         <div>
             <h1>Register</h1>
-            <Form>
-                <Input
-                    id="firstName"
-                    type="text"
-                    placeholder="First Name"
-                />
-                <Input
-                    id="lastName"
-                    type="text"
-                    placeholder="Last Name"
-                />
-                <Input
-                    id="username"
-                    type="text"
-                    placeholder="Username"
-                />
-                <Input type="password"
-                    id="password"
-                    placeholder="Password"
-                />
-            </Form>
-            <Button onClick={ register }>Register</Button>
-            <Button href="#/login">Login</Button>
+            <div className="form">
+                <ListGroup>
+                    <ListGroupItem>
+                        <Input
+                            id="firstName"
+                            type="text"
+                            placeholder="First Name"
+                        />
+                    </ListGroupItem>
+                    <ListGroupItem>
+                        <Input
+                            id="lastName"
+                            type="text"
+                            placeholder="Last Name"
+                        />
+                    </ListGroupItem>
+                    <ListGroupItem>
+                        <Input
+                            id="username"
+                            type="text"
+                            placeholder="Username"
+                        />
+                    </ListGroupItem>
+                    <ListGroupItem>
+                        <Input type="password"
+                            id="password"
+                            placeholder="Password"
+                        />
+                    </ListGroupItem>
+                </ListGroup>
+            </div>
+            <div className="buttonLine">
+                <Button onClick={ register }>Register</Button>
+                <Button href="#/login">Login</Button>
+            </div>
         </div>
     );
 };

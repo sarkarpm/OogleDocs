@@ -1,10 +1,10 @@
 import React from 'react';
-import { Button, Input, Form } from 'reactstrap';
+import { Button, Input, ListGroup, ListGroupItem } from 'reactstrap';
 var axios = require( 'axios' );
 
 const Login = ( props ) => {
     const login = () => {
-        console.log('props', props);
+        console.log( 'props', props );
         const username = document.getElementById( "username" ).value;
         const password = document.getElementById( "password" ).value;
         axios.post( 'http://localhost:3000/login', {
@@ -16,7 +16,7 @@ const Login = ( props ) => {
                 if ( response.data.success ) {
                     window.sessionStorage.setItem( "userId", response.data.userId );
                     props.history.push( "/home" );
-                    props.socket.emit('login', JSON.stringify({username, userId: response.data.userId }));
+                    props.socket.emit( 'login', JSON.stringify( { username, userId: response.data.userId } ) );
                 }
                 console.log( "session id", window.sessionStorage.getItem( 'userId' ) );
             } )
@@ -28,19 +28,27 @@ const Login = ( props ) => {
     return (
         <div>
             <h1>Welcome to OogleDocs!</h1>
-            <Form>
-                <Input
-                    type="text"
-                    id="username"
-                    placeholder="Username"
-                />
-                <Input type="password"
-                    id="password"
-                    placeholder="Password"
-                />
-            </Form>
-            <Button onClick={login}>Login</Button>
-            <Button href="#/register">Register</Button>
+            <div className="form">
+                <ListGroup>
+                    <ListGroupItem>
+                        <Input
+                            id="username"
+                            type="text"
+                            placeholder="Username"
+                        />
+                    </ListGroupItem>
+                    <ListGroupItem>
+                        <Input type="password"
+                            id="password"
+                            placeholder="Password"
+                        />
+                    </ListGroupItem>
+                </ListGroup>
+            </div>
+            <div className="buttonLine">
+                <Button onClick={ login }>Login</Button>
+                <Button href="#/register">Register</Button>
+            </div>
         </div>
     );
 };
