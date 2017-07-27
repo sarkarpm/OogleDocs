@@ -56,6 +56,11 @@ class DocEdit extends React.Component {
             } );
     }
 
+    search() {
+        console.log(document.getElementById("editor").textContent);
+        console.log(document.getElementById("editor").innerHTML);
+    }
+
     componentWillMount() {
         axios.post( "http://localhost:3000/loadDocument", {
             docId: this.state.docId
@@ -120,13 +125,14 @@ class DocEdit extends React.Component {
                 </Modal>
                 <div className="backButton">
                     <Button onClick={ toggleCreate }>Docs Home</Button>
+                    <Button onClick={ this.search }>Search</Button>
                 </div>
                 <div>
                     <h1>{ this.state.documentTitle }</h1>
                     <p>ID: { this.state.docId }</p>
                 </div>
                 <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
-                <div className='editor' onClick={ this.focus }>
+                <div id='editor' onClick={ this.focus }>
                     <Editor
                         customStyleMap={ customStyleMap }
                         editorState={ this.state.editorState }

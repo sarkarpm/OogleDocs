@@ -3,7 +3,7 @@ import { Button, DropdownMenu, DropdownItem, DropdownToggle, Dropdown } from 're
 import axios from 'axios';
 import customStyleMap from '../customMaps/customStyleMap';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
-import { Editor, EditorState, convertFromRaw } from 'draft-js';
+import { Editor, EditorState, convertFromRaw, convertToRaw } from 'draft-js';
 
 class History extends React.Component {
     constructor( props ) {
@@ -37,6 +37,23 @@ class History extends React.Component {
         return index === 0 ? 'Beginning' : 'Save ' + index;
     }
 
+    changeToHistory() {
+        const rawDraftContentState = JSON.stringify( convertToRaw( this.state.editorState.getCurrentContent() ) );
+        this.state.socket.emit( 'madeChange', rawDraftContentState );
+        axios.post( 'http://localhost:3000/save', {
+
+            contentState: rawDraftContentState,
+            docId: this.state.docId
+        } )
+            .then( response => {
+                console.log( 'Document successfully saved' );
+                //TODO implement a popup window alerting the user that doc has been saved
+            } )
+            .catch( err => {
+                console.log( 'error saving document', err );
+            } );
+    }
+
     componentWillMount() {
         const self = this;
         axios.post( 'http://localhost:3000/historylist', { docId: this.state.docId } )
@@ -46,6 +63,11 @@ class History extends React.Component {
                 );
                 self.setState( { history: buttons, title: res.data.title } );
             } );
+        this.state.socket.emit( 'joinedDocument', this.state.docId );
+    }
+
+    componentWillUnmount() {
+        this.state.socket.emit( 'leftDocument', this.state.docId );
     }
 
     render() {
@@ -59,17 +81,22 @@ class History extends React.Component {
                             { this.state.selected }
                         </DropdownToggle>
                         <DropdownMenu>
-                            { this.state.history }
+                            <div className="d">
+                                { this.state.history }
+                            </div>
                         </DropdownMenu>
                     </Dropdown>
                 </div>
-                <div className="editor">
+                <div id="editor">
                     <Editor
                         readOnly
                         customStyleMap={ customStyleMap }
                         editorState={ this.state.editorState }
                         blockRenderMap={ extendedBlockRenderMap }
                     />
+                </div>
+                <div className="buttonLine">
+                    <Button onClick={ this.changeToHistory.bind( this ) }>Save to Current</Button>
                 </div>
             </div>
         );
