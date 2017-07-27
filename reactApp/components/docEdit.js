@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { Editor, EditorState, convertFromRaw, convertToRaw } from 'draft-js';
+import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
@@ -12,7 +12,6 @@ class DocEdit extends React.Component {
         super( props );
         this.state = {
             editorState: EditorState.createEmpty(),
-            socket: this.props.socket,
             docId: this.props.match.params.docid,
             documentTitle: '',
             createModal: false,
@@ -21,13 +20,22 @@ class DocEdit extends React.Component {
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
             needsToSave = true;
-            console.log("needsToSave boolean", needsToSave)
-            //console.log('editor state in on change', editorState);
             const rawDraftContentState = JSON.stringify( convertToRaw( editorState.getCurrentContent() ) );
-            this.state.socket.emit( 'madeChange', rawDraftContentState );
+            this.props.socket.emit( 'madeChange', rawDraftContentState );
+            const newSelection = editorState.getSelection();
+            if ( newSelection ) {
+                const selectionInfo = {
+                    anchorKey: newSelection.getAnchorKey(),
+                    anchorOffset: newSelection.getAnchorOffset(),
+                    focusKey: newSelection.getFocusKey(),
+                    focusOffset: newSelection.getFocusOffset(),
+                    isBackward: newSelection.isBackward
+                };
+                this.props.socket.emit( 'madeSelection', JSON.stringify( selectionInfo ) );
+            }
         };
         this.focus = () => this.refs.editor.focus();
-        
+
     }
 
 
@@ -39,119 +47,140 @@ class DocEdit extends React.Component {
 
     _saveDocument() {
         const rawDraftContentState = JSON.stringify( convertToRaw( this.state.editorState.getCurrentContent() ) );
-        //console.log("this.state", this.state)
-        //console.log("this.state.editorstate", this.state.editorState)
-        //console.log("contentState", rawDraftContentState)   
-        if(needsToSave){
-            console.log('is saving every 30 seconds');
-            axios.post('http://localhost:3000/save', {
+        if ( needsToSave ) {
+            console.log( 'is saving every 30 seconds' );
+            axios.post( 'http://localhost:3000/save', {
 
                 contentState: rawDraftContentState,
                 docId: this.state.docId
             } )
-            .then( response => {
-                console.log( 'Document successfully saved' );
-                //TODO implement a popup window alerting the user that doc has been saved
-            } )
-            .catch( err => {
-                console.log( 'error saving document', err );
-            } );
+                .then( response => {
+                    console.log( 'Document successfully saved' );
+                } )
+                .catch( err => {
+                    console.log( 'error saving document', err );
+                } );
             needsToSave = false;
         }
 
-        
+
     }
 
     search() {
-        console.log(document.getElementById("editor").textContent);
-        console.log(document.getElementById("editor").innerHTML);
+        console.log( document.getElementById( "editor" ).textContent );
+        console.log( document.getElementById( "editor" ).innerHTML );
     }
 
     componentWillMount() {
-        axios.post( "http://localhost:3000/loadDocument", {
-            docId: this.state.docId
-        } )
-        .then( response => {
-            const loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState[response.data.doc.contentState.length - 1] ) );
-                //console.log('loadedContentState', loadedContentState);
-                this.setState( {
-                    editorState: EditorState.createWithContent( loadedContentState ),
-documentTitle: response.data.doc.title
-} );
-this.state.socket.emit( 'joinedDocument', this.state.docId );
-} )
-.catch( err => {
-    console.log( 'error loading document', err );
-} );
+        var self = this;
+        this.props.socket.emit( 'joinDocument', this.state.docId );
+        this.props.socket.on( 'roomStatus', ( roomStatus ) => {
+            console.log( 'room status', roomStatus );
+        } );
+        this.props.socket.on( 'userColor', ( userColor ) => {
+            console.log( 'userColor', userColor );
+        } );
+        this.props.socket.on( 'changeListener', ( changedDoc ) => {
+            self.updateContentFromSocket( changedDoc );
+        } );
+        this.props.socket.on( 'renderSelection', ( newSelection ) => {
+            console.log( 'newS', newSelection );
+            const userColor = 'cursor' + newSelection.userColor;
+            newSelection = newSelection.ranges;
+            const updateSelection = new SelectionState( {
+                anchorKey: newSelection.anchorKey,
+                anchorOffset: newSelection.anchorOffset,
+                focusKey: newSelection.focusKey,
+                focusOffset: Math.abs( newSelection.anchorOffset !== newSelection.focusOffset ) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
+                isBackward: newSelection.isBackward
+            } );
+            let newEditorState = EditorState.acceptSelection( this.state.editorState, updateSelection );
+            newEditorState = EditorState.forceSelection( newEditorState, newEditorState.getSelection() );
+            let contentWithCursor = newEditorState.getCurrentContent();
+            console.log( 'userColor', userColor );
+            contentWithCursor = Modifier.applyInlineStyle(
+                contentWithCursor,
+                updateSelection,
+                userColor
+            );
+            this.setState( { saveInterval: setInterval( this._saveDocument.bind( this ), 30000 ) } );
+            console.log( contentWithCursor );
 
-this.state.socket.on('message', message => {
-    console.log('message in doc: ', message);
-});
-var self = this;
-        // this.state.socket.on('roomIsReady', (ready) => {
-        //     saveInterval = setInterval(this._saveDocument.bind(this), 30000)
-        // })
-        this.setState({saveInterval: setInterval(this._saveDocument.bind(this), 30000)});
-        //console.log('saveinterval', this.state.saveInterval)
+            this.setState( { editorState: EditorState.createWithContent( contentWithCursor ) } );
+        } );
 
+        this.props.socket.on( 'currentState', ( currentState ) => {
+            axios.post( "http://localhost:3000/loadDocument", {
+                docId: this.state.docId
+            } )
+                .then( response => {
+                    let loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState[response.data.doc.contentState.length - 1] ) );
+                    if ( currentState ) {
+                        loadedContentState = convertFromRaw( JSON.parse( currentState ) );
+                    } else {
+                        loadedContentState = convertFromRaw( JSON.parse( response.data.doc.contentState[response.data.doc.contentState.length - 1] ) );
+                    }
+                    this.setState( {
+                        editorState: EditorState.createWithContent( loadedContentState ),
+                        documentTitle: response.data.doc.title
+                    } );
+                } )
+                .catch( err => {
+                    console.log( 'error loading document', err );
+                } );
+
+        } );
     }
 
-    componentDidMount() {
-        var self = this;
-        this.state.socket.on( 'changeListener', ( changedDoc ) => {
-            self.updateContentFromSocket( changedDoc );
-    } );
-}
-
-updateContentFromSocket( changedDoc ) {
-        //console.log('changedDoc', changedDoc);
+    updateContentFromSocket( changedDoc ) {
         changedDoc = convertFromRaw( JSON.parse( changedDoc ) );
-        //console.log('changedDoc', changedDoc);
         this.setState( { editorState: EditorState.createWithContent( changedDoc ) } );
-}
+    }
 
-componentWillUnmount() {
-        //console.log("editorState WHEN U LEAVE", this.state.editorState)
-        //this._saveDocument();
-        clearInterval(this.state.saveInterval);
-        //console.log('clearInterval', this.state.saveInterval)
-        this.state.socket.emit( 'leftDocument', this.state.docId );
+    componentWillUnmount() {
+        this.props.socket.emit( 'leaveDocument', this.state.docId );
+        this.props.socket.removeListener( 'changeListener' );
+        this.props.socket.removeListener( 'message ' );
+        this.props.socket.removeListener( 'docInfo' );
+        this.props.socket.removeListener( 'userColor' );
+        this.props.socket.removeListener( 'renderSelection' );
+        clearInterval( this.state.saveInterval );
     }
 
     render() {
         const toggleCreate = this.toggleCreate.bind( this );
         return (
             <div>
-            <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
-            <ModalHeader toggle={ toggleCreate }>Do you want to save?</ModalHeader>
-            <ModalBody>
-            <Button href="#/home" type="submit" onClick={ this._saveDocument.bind( this ) }>Save</Button>
-            <Button href="#/home" type="submit">Leave without Saving</Button>
-            </ModalBody>
-            </Modal>
-            <div className="backButton">
-            <Button onClick={ toggleCreate }>Docs Home</Button>
-            <Button onClick={ this.search }>Search</Button>
+                <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
+                    <ModalHeader toggle={ toggleCreate }>Do you want to save?</ModalHeader>
+                    <ModalBody>
+                        <Button href="#/home" type="submit" onClick={ this._saveDocument.bind( this ) }>Save</Button>
+                        <Button href="#/home" type="submit">Leave without Saving</Button>
+                    </ModalBody>
+                </Modal>
+                <div className="backButton">
+                    <Button onClick={ toggleCreate }>Docs Home</Button>
+                    <Button onClick={ this.search }>Search</Button>
+                </div>
+                <div>
+                    <h1>{ this.state.documentTitle }</h1>
+                    <p>ID: { this.state.docId }</p>
+                </div>
+                <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
+                <div id='editor' onClick={ this.focus }>
+                    <Editor
+                        customStyleMap={ customStyleMap }
+                        editorState={ this.state.editorState }
+                        onChange={ this.onChange }
+                        placeholder="Write something colorful..."
+                        ref="editor" blockRenderMap={ extendedBlockRenderMap }
+                    />
+                </div>
+                <div className="buttonLine">
+                    <Button href={ `#/history/${ this.state.docId }` }>Doc History</Button>
+                </div>
             </div>
-            <div>
-            <h1>{ this.state.documentTitle }</h1>
-            <p>ID: { this.state.docId }</p>
-            </div>
-            <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
-            <div id='editor' onClick={ this.focus }>
-            <Editor
-            customStyleMap={ customStyleMap }
-            editorState={ this.state.editorState }
-            onChange={ this.onChange }
-            placeholder="Write something colorful..."
-            ref="editor" blockRenderMap={ extendedBlockRenderMap }
-            />
-            </div>
-            <div className="buttonLine">
-            <Button href={ `#/history/${ this.state.docId }` }>Doc History</Button>
-            </div>
-            </div>
-            );
+        );
     }
 }
 

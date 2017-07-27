@@ -85,3 +85,17 @@ h1, p {
     overflow-y: scroll;
     max-height: 50vh;
 }
+
+.my-Input {
+    border-right: 1px solid transparent;
+    border-color: red;
+}
+.my-Input:focus {
+    animation: PulseAttention 1.5s cubic-bezier(.215, .61, .355, 1) forwards infinite;
+}
+
+@keyframes PulseAttention {
+    50% {
+        border-color: red;
+    }
+}

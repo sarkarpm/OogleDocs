@@ -4,7 +4,6 @@ var axios = require( 'axios' );
 
 const Login = ( props ) => {
     const login = () => {
-        console.log( 'props', props );
         const username = document.getElementById( "username" ).value;
         const password = document.getElementById( "password" ).value;
         axios.post( 'http://localhost:3000/login', {
@@ -12,7 +11,6 @@ const Login = ( props ) => {
             password
         } )
             .then( function ( response ) {
-                console.log( "RESPONSE", response.data );
                 if ( response.data.success ) {
                     window.sessionStorage.setItem( "userId", response.data.userId );
                     props.history.push( "/home" );

@@ -86,4 +86,40 @@ export default {
     fontSize64: {
         fontSize: 64
     },
+    cursorRed: {
+        borderLeft: 'solid',
+        borderColor: 'red',
+        borderWidth: 0.5,
+        backgroundColor: 'red'
+    },
+    cursorGreen: {
+        borderLeft: 'solid',
+        borderColor: 'green',
+        borderWidth: 0.5,
+        backgroundColor: 'green'
+    },
+    cursorBlue: {
+        borderLeft: 'solid',
+        borderColor: 'blue',
+        borderWidth: 0.5,
+        backgroundColor: 'blue'
+    },
+    cursorPurple: {
+        borderLeft: 'solid',
+        borderColor: 'purple',
+        borderWidth: 0.5,
+        backgroundColor: 'purple'
+    },
+    cursorYellow: {
+        borderLeft: 'solid',
+        borderColor: 'yellow',
+        borderWidth: 0.5,
+        backgroundColor: 'yellow'
+    },
+    cursorOrange: {
+        borderLeft: 'solid',
+        borderColor: 'orange',
+        borderWidth: 0.5,
+        backgroundColor: 'orange'
+    }
 };
