@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button, Modal, ModalHeader, ModalBody } from 'reactstrap';
-import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier } from 'draft-js';
+import { Button, Modal, ModalHeader, ModalBody, Input } from 'reactstrap';
+import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier, CompositeDecorator } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
@@ -15,7 +15,8 @@ class DocEdit extends React.Component {
             docId: this.props.match.params.docid,
             documentTitle: '',
             createModal: false,
-            setInterval: ""
+            setInterval: "",
+            searchTerm: ''
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
@@ -62,13 +63,37 @@ class DocEdit extends React.Component {
                 } );
             needsToSave = false;
         }
-
-
     }
 
-    search() {
-        console.log( document.getElementById( "editor" ).textContent );
-        console.log( document.getElementById( "editor" ).innerHTML );
+    search( e ) {
+        const self = this;
+        this.setState( { searchTerm: e.target.value }, (e) => {
+            const highlightComposite = new CompositeDecorator( [{
+                strategy: self.highlightStrategy.bind( self ),
+                component: self.highlightSpan
+            }] );
+            self.setState( { editorState: EditorState.set( self.state.editorState, { decorator: highlightComposite } ) } );
+        } );
+    }
+
+    highlightStrategy( contentBlock, callback, contentState ) {
+        if ( this.state.searchTerm !== '' ) {
+            this.findWithRegex( new RegExp( this.state.searchTerm, 'g' ), contentBlock, callback );
+        }
+    }
+
+    findWithRegex( regex, contentBlock, callback ) {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ( ( matchArr = regex.exec( text ) ) !== null ) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback( start, end );
+        }
+    }
+
+    highlightSpan( props ) {
+        return ( <span className="yellowHighlight">{ props.children }</span> );
     }
 
     componentWillMount() {
@@ -160,7 +185,6 @@ class DocEdit extends React.Component {
                 </Modal>
                 <div className="backButton">
                     <Button onClick={ toggleCreate }>Docs Home</Button>
-                    <Button onClick={ this.search }>Search</Button>
                 </div>
                 <div>
                     <h1>{ this.state.documentTitle }</h1>
@@ -172,11 +196,11 @@ class DocEdit extends React.Component {
                         customStyleMap={ customStyleMap }
                         editorState={ this.state.editorState }
                         onChange={ this.onChange }
-                        placeholder="Write something colorful..."
                         ref="editor" blockRenderMap={ extendedBlockRenderMap }
                     />
                 </div>
                 <div className="buttonLine">
+                    <Input id="search" placeholder="Search" onChange={ this.search.bind( this ) } />
                     <Button href={ `#/history/${ this.state.docId }` }>Doc History</Button>
                 </div>
             </div>

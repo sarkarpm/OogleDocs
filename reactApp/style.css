@@ -34,6 +34,7 @@ h1, p {
     width: 85%;
     height: 65vh;
     margin-top: 10px;
+    margin-bottom: 20px;
     margin-left: auto;
     margin-right: auto;
     overflow-y: scroll;
@@ -71,6 +72,7 @@ h1, p {
 }
 .backButton {
     margin: 10px;
+    position: absolute;
 }
 .toolbar {
     display: flex;
@@ -98,4 +100,8 @@ h1, p {
     50% {
         border-color: red;
     }
+}
+
+.yellowHighlight {
+    background-color: yellowgreen;
 }
