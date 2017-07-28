@@ -121,5 +121,6 @@ export default {
         borderColor: 'orange',
         borderWidth: 0.5,
         backgroundColor: 'orange'
-    }
+    },
+    nullStyle: {}
 };

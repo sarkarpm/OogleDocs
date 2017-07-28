@@ -12,7 +12,8 @@ class DocEdit extends React.Component {
         this.state = {
             editorState: EditorState.createEmpty(),
             docId: this.props.match.params.docid,
-            documentTitle: ''
+            documentTitle: '',
+            userColor: null
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
@@ -20,12 +21,16 @@ class DocEdit extends React.Component {
             this.props.socket.emit('madeChange', rawDraftContentState);
             const newSelection = editorState.getSelection();
             if (newSelection) {
-                const selectionInfo = {
-                    anchorKey: newSelection.getAnchorKey(),
-                    anchorOffset: newSelection.getAnchorOffset(),
-                    focusKey: newSelection.getFocusKey(),
-                    focusOffset: newSelection.getFocusOffset(),
-                    isBackward: newSelection.isBackward
+                let selectionInfo = {
+                    selectionState: {
+                        anchorKey: newSelection.getAnchorKey(),
+                        anchorOffset: newSelection.getAnchorOffset(),
+                        focusKey: newSelection.getFocusKey(),
+                        focusOffset: newSelection.getFocusOffset(),
+                        isBackward: newSelection.isBackward
+                    },
+                    docId: this.state.docId,
+                    userColor: this.state.userColor
                 };
                 this.props.socket.emit('madeSelection', JSON.stringify(selectionInfo));
             }
@@ -40,35 +45,37 @@ class DocEdit extends React.Component {
             console.log('room status', roomStatus);
         });
         this.props.socket.on('userColor', (userColor) => {
-            console.log('userColor', userColor);
+            this.state.userColor = userColor;
         });
         this.props.socket.on('changeListener', (changedDoc) => {
             self.updateContentFromSocket(changedDoc);
         });
-        this.props.socket.on('renderSelection', (newSelection) => {
-            console.log('newS', newSelection);
-            const userColor = 'cursor' + newSelection.userColor;
-            newSelection = newSelection.ranges;
-            const updateSelection = new SelectionState({
-                anchorKey: newSelection.anchorKey,
-                anchorOffset: newSelection.anchorOffset,
-                focusKey: newSelection.focusKey,
-                focusOffset: Math.abs(newSelection.anchorOffset !== newSelection.focusOffset) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
-                isBackward: newSelection.isBackward
-            });
-            let newEditorState = EditorState.acceptSelection(this.state.editorState, updateSelection);
-            newEditorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
-            let contentWithCursor = newEditorState.getCurrentContent();
-            console.log('userColor', userColor);
-            contentWithCursor = Modifier.applyInlineStyle(
-              contentWithCursor,
-              updateSelection,
-              userColor
-            );
+        this.props.socket.on('renderSelection', (selectionInfo) => {
 
-            console.log(contentWithCursor);
-
-            this.setState({editorState: EditorState.createWithContent(contentWithCursor)});
+            selectionInfo = JSON.parse(selectionInfo);
+            console.log('newSI', selectionInfo);
+            if (selectionInfo.userColor !== this.state.userColor) {
+                let newSelection = selectionInfo.selectionState;
+                const userColor = 'cursor' + selectionInfo.userColor;
+                const updateSelection = new SelectionState({
+                    anchorKey: newSelection.anchorKey,
+                    anchorOffset: newSelection.anchorOffset,
+                    focusKey: newSelection.focusKey,
+                    focusOffset: Math.abs(newSelection.anchorOffset !== newSelection.focusOffset) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
+                    isBackward: newSelection.isBackward
+                });
+                let newEditorState = EditorState.acceptSelection(this.state.editorState, updateSelection);
+                newEditorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
+                let contentWithCursor = newEditorState.getCurrentContent();
+                console.log('userColor', userColor);
+                contentWithCursor = Modifier.applyInlineStyle(
+                contentWithCursor,
+                updateSelection,
+                userColor
+              );
+                console.log(contentWithCursor);
+                this.setState({editorState: EditorState.createWithContent(contentWithCursor)});
+            }
         });
 
         this.props.socket.on('currentState', (currentState) => {
@@ -109,6 +116,9 @@ class DocEdit extends React.Component {
     }
 
     render() {
+        customStyleMap['cursor' + this.state.userColor] = {};
+        console.log('customStyleMap', customStyleMap);
+
         return (
             <div>
                 <div>

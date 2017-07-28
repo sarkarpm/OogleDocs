@@ -2,6 +2,8 @@ function socketHandler(io){
 
     let allDocs = {};
 
+    let allSelections = {};
+
     io.on('connection', socket => {
         console.log( 'listening in socket...' );
 
@@ -43,14 +45,35 @@ function socketHandler(io){
             socket.to( socket.currentDoc ).emit( 'changeListener', changedDoc );
         });
 
-        socket.on( 'madeSelection', ranges => {
-            ranges = JSON.parse(ranges);
-            const newSelection = {
-                ranges,
-                userColor: socket.userColor
-            };
-            // console.log('newSelection', newSelection);
-            socket.broadcast.to( socket.currentDoc ).emit( 'renderSelection', newSelection);
+        socket.on( 'madeSelection', selectionInfo => {
+            // console.log('selI before parse', selectionInfo);
+            selectionInfo = JSON.parse(selectionInfo);
+            // console.log('selI after parse', selectionInfo);
+            if(!allSelections[selectionInfo.docId]) {
+                allSelections[selectionInfo.docId] = [selectionInfo];
+                // console.log('all selections after created doc', allSelections);
+                console.log('here1');
+            } else {
+                const index = allSelections[selectionInfo.docId].findIndex( selection => {
+                    console.log('selection usercolor', selection.userColor );
+                    console.log('socker usercolor', socket.userColor );
+                    return selection.userColor === socket.userColor;
+                });
+                allSelections[selectionInfo.docId].splice(index, 1, selectionInfo);
+
+
+
+                // console.log('index', index);
+                console.log('socketcolor', socket.userColor);
+                // console.log('new selection info', selectionInfo);
+                console.log('all selections', allSelections);
+                console.log('doc selectionInfo', allSelections[selectionInfo.docId]);
+            }
+            allSelections[selectionInfo.docId].forEach(selection => {
+                console.log('selection in for each', selection);
+                socket.broadcast.to( socket.currentDoc ).emit( 'renderSelection', JSON.stringify(selection));
+                console.log('broadcasted selState', selection.selectionState);
+            });
         });
     });
 }
@@ -59,16 +82,8 @@ function getJoinInfo(docId, allDocs) {
     let userColor = allDocs[docId].availableColors.pop();
     allDocs[docId].usedColors.push(userColor);
     if (allDocs[docId].availableColors.length === 0) {
-        console.log('full in getJoinInfo!');
-        console.log('docId in getJoinInfo', docId);
-        console.log('allDocs in getJoinInfo', allDocs);
-        console.log('docInfo in getJoinInfo', allDocs[docId]);
         return { userColor: null, roomStatus: 'full'};
     } else {
-        console.log('inBetween in getJoinInfo!!');
-        console.log('docId in getJoinInfo', docId);
-        console.log('allDocs in getJoinInfo', allDocs);
-        console.log('docInfo in getJoinInfo', allDocs[docId]);
         return { userColor, roomStatus: 'inBetween'};
     }
 
@@ -78,16 +93,8 @@ function getLeaveInfo(docId, allDocs, socket) {
     allDocs[docId].availableColors.push(socket.userColor);
     allDocs[docId].usedColors.splice(allDocs[docId].usedColors.indexOf(socket.userColor), 1);
     if (allDocs[docId].availableColors.length === 6) {
-        console.log('empty in getLeaveInfo!');
-        console.log('docId in getLeaveInfo', docId);
-        console.log('allDocs in getLeaveInfo', allDocs);
-        console.log('docInfo in getLeaveInfo', allDocs[docId]);
         return 'empty';
     } else {
-        console.log('inBetween in getLeaveInfo!');
-        console.log('docId in getLeaveInfo', docId);
-        console.log('allDocs in getLeaveInfo', allDocs);
-        console.log('docInfo in getLeaveInfo', allDocs[docId]);
         return 'inBetween';
     }
 }
