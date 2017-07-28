@@ -12,14 +12,16 @@ class DocEdit extends React.Component {
         this.state = {
             editorState: EditorState.createEmpty(),
             docId: this.props.match.params.docid,
-            documentTitle: ''
+            documentTitle: '',
+            userColor: null,
+            selections: {}
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
             const rawDraftContentState = JSON.stringify( convertToRaw(editorState.getCurrentContent()) );
             this.props.socket.emit('madeChange', rawDraftContentState);
             const newSelection = editorState.getSelection();
-            if (newSelection) {
+            if (newSelection && newSelection.getHasFocus()) {
                 const selectionInfo = {
                     anchorKey: newSelection.getAnchorKey(),
                     anchorOffset: newSelection.getAnchorOffset(),
@@ -40,14 +42,26 @@ class DocEdit extends React.Component {
             console.log('room status', roomStatus);
         });
         this.props.socket.on('userColor', (userColor) => {
-            console.log('userColor', userColor);
+            this.state.userColor = userColor;
         });
         this.props.socket.on('changeListener', (changedDoc) => {
             self.updateContentFromSocket(changedDoc);
         });
         this.props.socket.on('renderSelection', (newSelection) => {
             console.log('newS', newSelection);
+
             const userColor = 'cursor' + newSelection.userColor;
+
+            if (this.state.selections[userColor] ) {
+                const removedState = Modifier.removeInlineStyle(
+                this.state.editorState.getCurrentContent(),
+                this.state.selections[userColor],
+                userColor
+              );
+                this.setState({editorState: EditorState.createWithContent(removedState)});
+
+            }
+
             newSelection = newSelection.ranges;
             const updateSelection = new SelectionState({
                 anchorKey: newSelection.anchorKey,
@@ -60,13 +74,15 @@ class DocEdit extends React.Component {
             newEditorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
             let contentWithCursor = newEditorState.getCurrentContent();
             console.log('userColor', userColor);
+
             contentWithCursor = Modifier.applyInlineStyle(
               contentWithCursor,
               updateSelection,
               userColor
             );
 
-            console.log(contentWithCursor);
+            this.state.selections[userColor] = updateSelection;
+
 
             this.setState({editorState: EditorState.createWithContent(contentWithCursor)});
         });
@@ -76,7 +92,7 @@ class DocEdit extends React.Component {
                 docId: this.state.docId
             })
           .then(response => {
-              let loadedContentState = convertFromRaw( JSON.parse(response.data.doc.contentState) );
+              let loadedContentState;
               if (currentState) {
                   loadedContentState = convertFromRaw( JSON.parse(currentState) );
               } else {
@@ -109,6 +125,7 @@ class DocEdit extends React.Component {
     }
 
     render() {
+        customStyleMap['cursor' + this.state.userColor] = {};
         return (
             <div>
                 <div>
