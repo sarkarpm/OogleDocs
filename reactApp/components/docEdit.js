@@ -1,11 +1,12 @@
 import React from 'react';
-import { Button } from 'reactstrap';
-import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier } from 'draft-js';
+import { Button, Modal, ModalHeader, ModalBody, Input } from 'reactstrap';
+import { Editor, EditorState, convertFromRaw, convertToRaw, SelectionState, Modifier, CompositeDecorator } from 'draft-js';
 import customStyleMap from '../customMaps/customStyleMap';
 import Toolbar from './Toolbar';
 import extendedBlockRenderMap from '../customMaps/customBlockMap';
 import axios from 'axios';
-
+//import SaveModal from './saveModal'
+var needsToSave = false;
 class DocEdit extends React.Component {
     constructor( props ) {
         super( props );
@@ -15,11 +16,15 @@ class DocEdit extends React.Component {
             documentTitle: '',
             userColor: null,
             selections: {}
+            createModal: false,
+            setInterval: "",
+            searchTerm: ''
         };
         this.onChange = ( editorState ) => {
             this.setState( { editorState } );
-            const rawDraftContentState = JSON.stringify( convertToRaw(editorState.getCurrentContent()) );
-            this.props.socket.emit('madeChange', rawDraftContentState);
+            needsToSave = true;
+            const rawDraftContentState = JSON.stringify( convertToRaw( editorState.getCurrentContent() ) );
+            this.props.socket.emit( 'madeChange', rawDraftContentState );
             const newSelection = editorState.getSelection();
             if (newSelection && newSelection.getHasFocus()) {
                 const selectionInfo = {
@@ -29,10 +34,68 @@ class DocEdit extends React.Component {
                     focusOffset: newSelection.getFocusOffset(),
                     isBackward: newSelection.isBackward
                 };
-                this.props.socket.emit('madeSelection', JSON.stringify(selectionInfo));
+                this.props.socket.emit( 'madeSelection', JSON.stringify( selectionInfo ) );
             }
         };
         this.focus = () => this.refs.editor.focus();
+
+    }
+
+
+    toggleCreate() {
+        this.setState( {
+            createModal: !this.state.createModal,
+        } );
+    }
+
+    _saveDocument() {
+        const rawDraftContentState = JSON.stringify( convertToRaw( this.state.editorState.getCurrentContent() ) );
+        if ( needsToSave ) {
+            console.log( 'is saving every 30 seconds' );
+            axios.post( 'http://localhost:3000/save', {
+
+                contentState: rawDraftContentState,
+                docId: this.state.docId
+            } )
+                .then( response => {
+                    console.log( 'Document successfully saved' );
+                } )
+                .catch( err => {
+                    console.log( 'error saving document', err );
+                } );
+            needsToSave = false;
+        }
+    }
+
+    search( e ) {
+        const self = this;
+        this.setState( { searchTerm: e.target.value }, (e) => {
+            const highlightComposite = new CompositeDecorator( [{
+                strategy: self.highlightStrategy.bind( self ),
+                component: self.highlightSpan
+            }] );
+            self.setState( { editorState: EditorState.set( self.state.editorState, { decorator: highlightComposite } ) } );
+        } );
+    }
+
+    highlightStrategy( contentBlock, callback, contentState ) {
+        if ( this.state.searchTerm !== '' ) {
+            this.findWithRegex( new RegExp( this.state.searchTerm, 'g' ), contentBlock, callback );
+        }
+    }
+
+    findWithRegex( regex, contentBlock, callback ) {
+        const text = contentBlock.getText();
+        let matchArr, start, end;
+        while ( ( matchArr = regex.exec( text ) ) !== null ) {
+            start = matchArr.index;
+            end = start + matchArr[0].length;
+            callback( start, end );
+        }
+    }
+
+    highlightSpan( props ) {
+        return ( <span className="yellowHighlight">{ props.children }</span> );
     }
 
     componentWillMount() {
@@ -63,31 +126,32 @@ class DocEdit extends React.Component {
             }
 
             newSelection = newSelection.ranges;
-            const updateSelection = new SelectionState({
+            const updateSelection = new SelectionState( {
                 anchorKey: newSelection.anchorKey,
                 anchorOffset: newSelection.anchorOffset,
                 focusKey: newSelection.focusKey,
-                focusOffset: Math.abs(newSelection.anchorOffset !== newSelection.focusOffset) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
+                focusOffset: Math.abs( newSelection.anchorOffset !== newSelection.focusOffset ) ? newSelection.focusOffset : newSelection.anchorOffset + 1,
                 isBackward: newSelection.isBackward
-            });
-            let newEditorState = EditorState.acceptSelection(this.state.editorState, updateSelection);
-            newEditorState = EditorState.forceSelection(newEditorState, newEditorState.getSelection());
+            } );
+            let newEditorState = EditorState.acceptSelection( this.state.editorState, updateSelection );
+            newEditorState = EditorState.forceSelection( newEditorState, newEditorState.getSelection() );
             let contentWithCursor = newEditorState.getCurrentContent();
             console.log('userColor', userColor);
 
             contentWithCursor = Modifier.applyInlineStyle(
-              contentWithCursor,
-              updateSelection,
-              userColor
+                contentWithCursor,
+                updateSelection,
+                userColor
             );
+            this.setState( { saveInterval: setInterval( this._saveDocument.bind( this ), 30000 ) } );
+            console.log( contentWithCursor );
 
             this.state.selections[userColor] = updateSelection;
 
+            this.setState( { editorState: EditorState.createWithContent( contentWithCursor ) } );
+        } );
 
-            this.setState({editorState: EditorState.createWithContent(contentWithCursor)});
-        });
-
-        this.props.socket.on('currentState', (currentState) => {
+        this.props.socket.on( 'currentState', ( currentState ) => {
             axios.post( "http://localhost:3000/loadDocument", {
                 docId: this.state.docId
             })
@@ -110,38 +174,52 @@ class DocEdit extends React.Component {
         });
     }
 
-    updateContentFromSocket(changedDoc) {
-        changedDoc = convertFromRaw( JSON.parse(changedDoc) );
-        this.setState({editorState: EditorState.createWithContent(changedDoc)});
+    updateContentFromSocket( changedDoc ) {
+        changedDoc = convertFromRaw( JSON.parse( changedDoc ) );
+        this.setState( { editorState: EditorState.createWithContent( changedDoc ) } );
     }
 
     componentWillUnmount() {
         this.props.socket.emit( 'leaveDocument', this.state.docId );
-        this.props.socket.removeListener('changeListener');
-        this.props.socket.removeListener('message ');
-        this.props.socket.removeListener('docInfo');
-        this.props.socket.removeListener('userColor');
-        this.props.socket.removeListener('renderSelection');
+        this.props.socket.removeListener( 'changeListener' );
+        this.props.socket.removeListener( 'message ' );
+        this.props.socket.removeListener( 'docInfo' );
+        this.props.socket.removeListener( 'userColor' );
+        this.props.socket.removeListener( 'renderSelection' );
+        clearInterval( this.state.saveInterval );
     }
 
     render() {
         customStyleMap['cursor' + this.state.userColor] = {};
+        const toggleCreate = this.toggleCreate.bind( this );
         return (
             <div>
-                <div>
-                    <Button href="#/home">Docs Home</Button>
-                    <Button href={ `#/history/${this.state.docId}` }>Doc History</Button>
+                <Modal isOpen={ this.state.createModal } toggle={ toggleCreate } backdrop={ true }>
+                    <ModalHeader toggle={ toggleCreate }>Do you want to save?</ModalHeader>
+                    <ModalBody>
+                        <Button href="#/home" type="submit" onClick={ this._saveDocument.bind( this ) }>Save</Button>
+                        <Button href="#/home" type="submit">Leave without Saving</Button>
+                    </ModalBody>
+                </Modal>
+                <div className="backButton">
+                    <Button onClick={ toggleCreate }>Docs Home</Button>
                 </div>
-                <div className="editorTitle">
+                <div>
                     <h1>{ this.state.documentTitle }</h1>
                     <p>ID: { this.state.docId }</p>
                 </div>
                 <Toolbar onSaveDocument={ this._saveDocument } docEdit={ this } />
-                <div className='editor' onClick={ this.focus }>
-                    <Editor customStyleMap={ customStyleMap } editorState={ this.state.editorState } onChange={ this.onChange }
-                        placeholder="Write something colorful..."
+                <div id='editor' onClick={ this.focus }>
+                    <Editor
+                        customStyleMap={ customStyleMap }
+                        editorState={ this.state.editorState }
+                        onChange={ this.onChange }
                         ref="editor" blockRenderMap={ extendedBlockRenderMap }
                     />
+                </div>
+                <div className="buttonLine">
+                    <Input id="search" placeholder="Search" onChange={ this.search.bind( this ) } />
+                    <Button href={ `#/history/${ this.state.docId }` }>Doc History</Button>
                 </div>
             </div>
         );
